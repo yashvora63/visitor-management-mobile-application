@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+
 import '../../data/network/constants/endpoints.dart';
 import '../../data/sharedpref/shared_preference_helper.dart';
 
@@ -22,19 +23,19 @@ abstract class NetworkModule {
 
     tokenDio.interceptors.add(
       LogInterceptor(
-        request: false,
-        responseBody: false,
-        requestBody: false,
-        requestHeader: false,
+        request: true,
+        responseBody: true,
+        requestBody: true,
+        requestHeader: true,
       ),
     );
 
     dio.interceptors.addAll([
       LogInterceptor(
-        request: false,
-        responseBody: false,
-        requestBody: false,
-        requestHeader: false,
+        request: true,
+        responseBody: true,
+        requestBody: true,
+        requestHeader: true,
       ),
     ]);
 

@@ -5,6 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:visitor_management_app/constants/colors.dart';
 import 'package:visitor_management_app/constants/strings.dart';
 import 'package:visitor_management_app/di/components/service_locator.dart';
+import 'package:intl/intl.dart';
 import 'package:visitor_management_app/models/visitors_list/visitors_model.dart';
 import 'package:visitor_management_app/stores/visitor_list/visitor_list_store.dart';
 import 'package:visitor_management_app/widgets/app_toast.dart';
@@ -118,24 +119,35 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
             return _buildErrorState(isDark, primaryGold, textPrimary, textSecondary);
           }
 
-          final name = detail?.name ?? initial?.name ?? 'Visitor';
-          final mobile =
-              detail?.mobileNumber.toString() ??
-              initial?.mobileNumber.toString() ??
-              '-';
+          final name = detail?.name.isNotEmpty == true
+              ? detail!.name
+              : (initial?.name.isNotEmpty == true ? initial!.name : 'Visitor');
+
+            final mobile =  detail?.mobile.toString() ??  '-';
           final email = detail?.email ?? initial?.email ?? '-';
           final visitorType =
               detail?.visitorType ?? initial?.visitorType ?? 'Visitor';
           final project = detail?.project ?? initial?.project ?? '-';
           final purpose = detail?.purpose ?? initial?.purpose ?? '-';
           final status = detail?.status ?? initial?.status ?? 'Registered';
-          final checkIn =
-              detail?.checkInTime ?? initial?.checkInTime ?? 'Not Checked In';
-          final checkOut =
-              detail?.checkOutTime ?? initial?.checkOutTime ?? 'Not Checked Out';
-          final createdAt =
-              detail?.createdAt ?? initial?.createdAt ?? 'Recently';
-          final id = detail?.id ?? initial?.id ?? widget.visitorId;
+
+          final checkIn = _formatDateTime(
+            detail?.checkInTime.toString(),
+            initial?.checkInTime.toString(),
+            fallback: 'Not Checked In',
+          );
+          final checkOut = _formatDateTime(
+
+            detail?.checkInTime.toString(),
+            initial?.checkInTime.toString(),
+            fallback: 'Not Checked Out',
+          );
+           final createdAt = _formatDateTime(
+            detail?.createdAt.toString(),
+            initial?.createdAt.toString(),
+            fallback: 'Recently',
+          );
+           final id = detail?.id ?? initial?.id ?? widget.visitorId;
 
           return RefreshIndicator(
             color: primaryGold,
@@ -371,6 +383,31 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
       ),
     );
   }
+
+  String _formatDateTime(
+    String? primary,
+    String? secondary, {
+    required String fallback,
+  }) {
+    String val = '';
+    if (primary != null &&
+        primary.trim().isNotEmpty &&
+        primary.toLowerCase() != 'null') {
+      val = primary.trim();
+    } else if (secondary != null &&
+        secondary.trim().isNotEmpty &&
+        secondary.toLowerCase() != 'null') {
+      val = secondary.trim();
+    }
+    if (val.isEmpty) return fallback;
+
+    final dt = DateTime.tryParse(val);
+    if (dt != null) {
+      return DateFormat('dd MMM yyyy, hh:mm a').format(dt.toLocal());
+    }
+    return val;
+  }
+
 
   String _getName() {
     return _visitorListStore.visitorDetail?.name ??

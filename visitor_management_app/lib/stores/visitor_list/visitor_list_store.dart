@@ -90,6 +90,69 @@ abstract class _VisitorListStore with Store {
       })
       .length;
 
+  // ================= Dashboard Calculative Metrics =================
+
+  bool _isSameDayAsToday(String? dateStr) {
+    if (dateStr == null || dateStr.trim().isEmpty) return false;
+    final dt = DateTime.tryParse(dateStr.trim());
+    if (dt != null) {
+      final local = dt.toLocal();
+      final now = DateTime.now();
+      return local.year == now.year &&
+          local.month == now.month &&
+          local.day == now.day;
+    }
+    return false;
+  }
+
+  int get totalVisitorsToday {
+    final parsedCount =
+        _allVisitors.where((v) => _isSameDayAsToday(v.createdAt.toString())).length;
+    if (parsedCount > 0) return parsedCount;
+    final hasAnyValidDate =
+        _allVisitors.any((v) => DateTime.tryParse(v.createdAt.toString().trim()) != null);
+    if (!hasAnyValidDate && _allVisitors.isNotEmpty) {
+      return _allVisitors.length;
+    }
+    return 0;
+  }
+
+  int get currentlyCheckedIn => checkedInVisitors;
+
+  int get checkedOutToday {
+    final checkedOutList = _allVisitors.where((v) {
+      final status = v.status.toLowerCase();
+      return status == 'checked out' ||
+          status.contains('check_out') ||
+          status == 'status 2';
+    }).toList();
+
+    final parsedCount =
+        checkedOutList.where((v) => _isSameDayAsToday(v.checkOutTime.toString())).length;
+    if (parsedCount > 0) return parsedCount;
+    final hasAnyValidDate = checkedOutList.any(
+      (v) => DateTime.tryParse(v.checkOutTime.toString().trim()) != null,
+    );
+    if (!hasAnyValidDate && checkedOutList.isNotEmpty) {
+      return checkedOutList.length;
+    }
+    return 0;
+  }
+
+  int get registeredVisitorsCount => _allVisitors.where((v) {
+        final status = v.status.toLowerCase();
+        return status == 'registered' ||
+            status.contains('register') ||
+            status == 'status 3';
+      }).length;
+
+  List<VisitorListModel> get allVisitors => _allVisitors;
+
+  List<VisitorListModel> get recentVisitors {
+    if (_allVisitors.isEmpty) return [];
+    return _allVisitors.reversed.take(5).toList();
+  }
+
   // ================= Actions =================
 
   @action
@@ -196,7 +259,7 @@ abstract class _VisitorListStore with Store {
       final q = searchQuery.trim().toLowerCase();
       result = result.where((v) {
         final nameMatch = v.name.toLowerCase().contains(q);
-        final mobileMatch = v.mobileNumber.toString().contains(q);
+        final mobileMatch = v.mobile.toString().contains(q);
         final emailMatch = v.email.toLowerCase().contains(q);
         final projectMatch = v.project.toLowerCase().contains(q);
         final purposeMatch = v.purpose.toLowerCase().contains(q);

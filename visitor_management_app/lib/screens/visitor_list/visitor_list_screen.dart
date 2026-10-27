@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:intl/intl.dart';
 import 'package:visitor_management_app/constants/colors.dart';
 import 'package:visitor_management_app/constants/strings.dart';
 import 'package:visitor_management_app/di/components/service_locator.dart';
@@ -45,19 +46,37 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
     }
   }
 
+  String _formatTime(dynamic val) {
+    if (val == null) return '-';
+    if (val is DateTime) {
+      return DateFormat('dd MMM, hh:mm a').format(val.toLocal());
+    }
+    final raw = val.toString().trim();
+    if (raw.isEmpty || raw.toLowerCase() == 'null') return '-';
+    final dt = DateTime.tryParse(raw);
+    if (dt != null) {
+      return DateFormat('dd MMM, hh:mm a').format(dt.toLocal());
+    }
+    return raw;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryGold = isDark ? AppColors.goldLight : AppColors.primaryGold;
-    final scaffoldBg =
-        isDark ? AppColors.darkScaffoldBg : AppColors.lightScaffoldBg;
+    final scaffoldBg = isDark
+        ? AppColors.darkScaffoldBg
+        : AppColors.lightScaffoldBg;
     final cardBg = isDark ? AppColors.darkCardBg : AppColors.lightCardBg;
-    final borderColor =
-        isDark ? AppColors.darkCardBorder : AppColors.lightBorder;
-    final textPrimary =
-        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
-    final textSecondary =
-        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final borderColor = isDark
+        ? AppColors.darkCardBorder
+        : AppColors.lightBorder;
+    final textPrimary = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
 
     return Scaffold(
       backgroundColor: scaffoldBg,
@@ -90,58 +109,12 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
           ],
         ),
         actions: [
-          // Live Visitor Count Pill
-          Observer(
-            builder: (_) => Container(
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AppColors.goldContainerDark
-                    : AppColors.goldContainerLight,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: primaryGold.withValues(alpha: 0.35),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      color: primaryGold,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: primaryGold.withValues(alpha: 0.6),
-                          blurRadius: 4,
-                          spreadRadius: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${_visitorListStore.totalVisitors} Logged',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: primaryGold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
           IconButton(
             icon: Icon(Icons.refresh_rounded, color: primaryGold, size: 22),
             tooltip: 'Refresh Visitors',
             onPressed: _fetchVisitors,
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
         ],
       ),
       body: RefreshIndicator(
@@ -150,16 +123,6 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
         onRefresh: _fetchVisitors,
         child: Column(
           children: [
-            const SizedBox(height: 8),
-            // Metrics Summary Bar
-            _buildMetricsBar(
-              isDark: isDark,
-              primaryGold: primaryGold,
-              cardBg: cardBg,
-              borderColor: borderColor,
-              textPrimary: textPrimary,
-              textSecondary: textSecondary,
-            ),
             const SizedBox(height: 12),
             // Search Bar
             _buildSearchBar(
@@ -178,7 +141,7 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
               textPrimary: textPrimary,
               textSecondary: textSecondary,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             // Visitor List Content
             Expanded(
               child: Observer(
@@ -217,7 +180,7 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                     padding: const EdgeInsets.only(
                       left: 16,
                       right: 16,
-                      top: 6,
+                      top: 4,
                       bottom: 24,
                     ),
                     itemCount: visitors.length,
@@ -242,148 +205,6 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // ================= Metrics Bar =================
-
-  Widget _buildMetricsBar({
-    required bool isDark,
-    required Color primaryGold,
-    required Color cardBg,
-    required Color borderColor,
-    required Color textPrimary,
-    required Color textSecondary,
-  }) {
-    return Observer(
-      builder: (_) {
-        final total = _visitorListStore.allVisitorsCount;
-        final checkedIn = _visitorListStore.checkedInVisitors;
-        final checkedOut = _visitorListStore.checkedOutVisitors;
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildMetricTile(
-                  isDark: isDark,
-                  cardBg: cardBg,
-                  borderColor: borderColor,
-                  title: 'Total',
-                  value: total.toString(),
-                  icon: Icons.people_outline_rounded,
-                  iconColor: primaryGold,
-                  accentColor: primaryGold,
-                  textPrimary: textPrimary,
-                  textSecondary: textSecondary,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _buildMetricTile(
-                  isDark: isDark,
-                  cardBg: cardBg,
-                  borderColor: borderColor,
-                  title: 'Checked In',
-                  value: checkedIn.toString(),
-                  icon: Icons.login_rounded,
-                  iconColor: AppColors.successGreen,
-                  accentColor: AppColors.successGreen,
-                  textPrimary: textPrimary,
-                  textSecondary: textSecondary,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _buildMetricTile(
-                  isDark: isDark,
-                  cardBg: cardBg,
-                  borderColor: borderColor,
-                  title: 'Checked Out',
-                  value: checkedOut.toString(),
-                  icon: Icons.logout_rounded,
-                  iconColor: AppColors.errorRed,
-                  accentColor: AppColors.errorRed,
-                  textPrimary: textPrimary,
-                  textSecondary: textSecondary,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildMetricTile({
-    required bool isDark,
-    required Color cardBg,
-    required Color borderColor,
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color iconColor,
-    required Color accentColor,
-    required Color textPrimary,
-    required Color textSecondary,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withValues(alpha: 0.2)
-                : Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: accentColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, size: 16, color: iconColor),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: textPrimary,
-                  ),
-                ),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: textSecondary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -423,7 +244,11 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
               fontSize: 13,
               color: textSecondary.withValues(alpha: 0.7),
             ),
-            prefixIcon: Icon(Icons.search_rounded, color: primaryGold, size: 20),
+            prefixIcon: Icon(
+              Icons.search_rounded,
+              color: primaryGold,
+              size: 20,
+            ),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
                     icon: Icon(
@@ -477,14 +302,16 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? primaryGold
                         : (isDark
-                            ? AppColors.darkCardBg
-                            : AppColors.lightCardBg),
+                              ? AppColors.darkCardBg
+                              : AppColors.lightCardBg),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected ? primaryGold : borderColor,
@@ -505,8 +332,9 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                       option,
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight:
-                            isSelected ? FontWeight.w700 : FontWeight.w600,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w600,
                         color: isSelected ? Colors.white : textSecondary,
                       ),
                     ),
@@ -535,13 +363,17 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
     final statusColor = _getStatusColor(visitor.status);
     final initials = visitor.name.trim().isNotEmpty
         ? visitor.name
-            .trim()
-            .split(' ')
-            .map((e) => e.isNotEmpty ? e[0] : '')
-            .take(2)
-            .join()
-            .toUpperCase()
+              .trim()
+              .split(' ')
+              .map((e) => e.isNotEmpty ? e[0] : '')
+              .take(2)
+              .join()
+              .toUpperCase()
         : 'V';
+
+    final hasCheckIn = visitor.checkInTime != null;
+    final hasCheckOut = visitor.checkOutTime != null;
+    final hasCreatedAt = visitor.createdAt != null;
 
     return Material(
       color: Colors.transparent,
@@ -663,12 +495,16 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                               color: textSecondary,
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              visitor.mobileNumber.toString(),
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: textSecondary,
+                            Flexible(
+                              child: Text(
+                                visitor.mobile,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: textSecondary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -708,14 +544,10 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
               const Divider(height: 1, thickness: 0.6),
               const SizedBox(height: 10),
 
-              // Bottom Details Row: Project, CheckIn Time, and Chevron
+              // Middle Details Row: Project, Status Badge, and Chevron
               Row(
                 children: [
-                  Icon(
-                    Icons.apartment_rounded,
-                    size: 14,
-                    color: primaryGold,
-                  ),
+                  Icon(Icons.apartment_rounded, size: 14, color: primaryGold),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
@@ -732,8 +564,10 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                   const SizedBox(width: 8),
                   // Status Badge
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
@@ -773,6 +607,116 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                   ),
                 ],
               ),
+
+              // Access Timestamps Row (Check-In / Check-Out / Registration)
+              if (hasCheckIn || hasCheckOut) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : Colors.black.withValues(alpha: 0.03),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: borderColor.withValues(alpha: 0.6),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      if (hasCheckIn)
+                        Expanded(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.login_rounded,
+                                size: 12,
+                                color: AppColors.successGreen,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  'In: ${_formatTime(visitor.checkInTime)}',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: textPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (hasCheckIn && hasCheckOut)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Container(
+                            width: 1,
+                            height: 12,
+                            color: borderColor,
+                          ),
+                        ),
+                      if (hasCheckOut)
+                        Expanded(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.logout_rounded,
+                                size: 12,
+                                color: AppColors.errorRed,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  'Out: ${_formatTime(visitor.checkOutTime)}',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: textPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ] else if (hasCreatedAt) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.schedule_rounded,
+                      size: 12,
+                      color: textSecondary.withValues(alpha: 0.7),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        'Registered: ${_formatTime(visitor.createdAt)}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
@@ -814,7 +758,9 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
               height: 46,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+                color: isDark
+                    ? Colors.white10
+                    : Colors.black.withValues(alpha: 0.05),
               ),
             ),
             const SizedBox(width: 14),
@@ -912,8 +858,10 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
               ),
             ),
           ],
@@ -975,8 +923,10 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
             ),
           ],

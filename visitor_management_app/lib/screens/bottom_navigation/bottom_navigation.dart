@@ -18,18 +18,18 @@ class BottomNavigation extends StatefulWidget {
 
 class _BottomNavigationState extends State<BottomNavigation> {
   late int _currentIndex;
-
-  final List<Widget> _screens = const [
-    DashboardScreen(),
-    VisitorListScreen(),
-    VisitorRegistrationScreen(),
-    QrScannerScreen(),
-  ];
+  late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    _screens = [
+      DashboardScreen(onNavigateTab: _onTabTapped),
+      const VisitorListScreen(),
+      const VisitorRegistrationScreen(),
+      const QrScannerScreen(),
+    ];
   }
 
   void _onTabTapped(int index) {

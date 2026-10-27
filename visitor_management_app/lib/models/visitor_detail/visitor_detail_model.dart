@@ -1,26 +1,26 @@
 class VisitorDetailModel {
   VisitorDetailModel({
-    required this.createdAt,
+    required this.id,
     required this.name,
-    required this.mobileNumber,
+    required this.mobile,
     required this.email,
     required this.visitorType,
     required this.project,
     required this.purpose,
     required this.status,
+    required this.createdAt,
     required this.checkInTime,
     required this.checkOutTime,
-    required this.id,
   });
 
-  final String createdAt;
-  static const String createdAtKey = "createdAt";
+  final String id;
+  static const String idKey = "id";
 
   final String name;
   static const String nameKey = "name";
 
-  final num mobileNumber;
-  static const String mobileNumberKey = "mobile_number";
+  final String mobile;
+  static const String mobileKey = "mobile";
 
   final String email;
   static const String emailKey = "email";
@@ -37,64 +37,62 @@ class VisitorDetailModel {
   final String status;
   static const String statusKey = "status";
 
-  final String checkInTime;
+  final DateTime? createdAt;
+  static const String createdAtKey = "created_at";
+
+  final DateTime? checkInTime;
   static const String checkInTimeKey = "check_in_time";
 
-  final String checkOutTime;
+  final DateTime? checkOutTime;
   static const String checkOutTimeKey = "check_out_time";
-
-  final String id;
-  static const String idKey = "id";
 
   factory VisitorDetailModel.fromJson(Map<String, dynamic> json) {
     return VisitorDetailModel(
-      createdAt: json["createdAt"]?.toString() ?? "",
-      name: json["name"]?.toString() ?? "",
-      mobileNumber: json["mobile_number"] is num
-          ? json["mobile_number"] as num
-          : num.tryParse(json["mobile_number"]?.toString() ?? "0") ?? 0,
-      email: json["email"]?.toString() ?? "",
-      visitorType: json["visitor_type"]?.toString() ?? "",
-      project: json["project"]?.toString() ?? "",
-      purpose: json["purpose"]?.toString() ?? "",
-      status: json["status"]?.toString() ?? "",
-      checkInTime: json["check_in_time"]?.toString() ?? "",
-      checkOutTime: json["check_out_time"]?.toString() ?? "",
-      id: json["id"]?.toString() ?? "",
+      id: json["id"] ?? "",
+      name: json["name"] ?? "",
+      mobile: json["mobile"] ?? "",
+      email: json["email"] ?? "",
+      visitorType: json["visitor_type"] ?? "",
+      project: json["project"] ?? "",
+      purpose: json["purpose"] ?? "",
+      status: json["status"] ?? "",
+      createdAt: DateTime.tryParse(json["created_at"] ?? ""),
+      checkInTime: DateTime.tryParse(json["check_in_time"] ?? ""),
+      checkOutTime: DateTime.tryParse(json["check_out_time"] ?? ""),
     );
   }
 
   Map<String, dynamic> toJson() => {
-    "createdAt": createdAt,
+    "id": id,
     "name": name,
-    "mobile_number": mobileNumber,
+    "mobile": mobile,
     "email": email,
     "visitor_type": visitorType,
     "project": project,
     "purpose": purpose,
     "status": status,
-    "check_in_time": checkInTime,
-    "check_out_time": checkOutTime,
-    "id": id,
+    "created_at": createdAt?.toIso8601String(),
+    "check_in_time": checkInTime?.toIso8601String(),
+    "check_out_time": checkOutTime?.toIso8601String(),
   };
 
   @override
   String toString() {
-    return "$createdAt, $name, $mobileNumber, $email, $visitorType, $project, $purpose, $status, $checkInTime, $checkOutTime, $id, ";
+    return "$id, $name, $mobile, $email, $visitorType, $project, $purpose, $status, $createdAt, $checkInTime, $checkOutTime, ";
   }
 }
 
 /*
 {
-	"createdAt": "createdAt 1",
-	"name": "name 1",
-	"mobile_number": 1,
-	"email": "email 1",
-	"visitor_type": "visitor_type 1",
-	"project": "project 1",
-	"purpose": "purpose 1",
-	"status": "status 1",
-	"check_in_time": "check_in_time 1",
-	"check_out_time": "check_out_time 1",
-	"id": "1"
+	"id": "VIS003",
+	"name": "Jash Shah",
+	"mobile": "0127891235",
+	"email": "Jash@example.com",
+	"visitor_type": "Customer",
+	"project": "Project C",
+	"purpose": "Stay",
+	"status": "Registered",
+	"created_at": "2026-10-10T10:00:00+05:30",
+	"check_in_time": "2026-10-27T10:00:00+05:30",
+	"check_out_time": "2026-10-28T10:00:00+05:30"
 }*/

@@ -1,26 +1,26 @@
 class VisitorListModel {
   VisitorListModel({
-    required this.createdAt,
+    required this.id,
     required this.name,
-    required this.mobileNumber,
+    required this.mobile,
     required this.email,
     required this.visitorType,
     required this.project,
     required this.purpose,
     required this.status,
+    required this.createdAt,
     required this.checkInTime,
     required this.checkOutTime,
-    required this.id,
   });
 
-  final String createdAt;
-  static const String createdAtKey = "createdAt";
+  final String id;
+  static const String idKey = "id";
 
   final String name;
   static const String nameKey = "name";
 
-  final num mobileNumber;
-  static const String mobileNumberKey = "mobile_number";
+  final String mobile;
+  static const String mobileKey = "mobile";
 
   final String email;
   static const String emailKey = "email";
@@ -37,149 +37,103 @@ class VisitorListModel {
   final String status;
   static const String statusKey = "status";
 
-  final String checkInTime;
+  final DateTime? createdAt;
+  static const String createdAtKey = "created_at";
+
+  final DateTime? checkInTime;
   static const String checkInTimeKey = "check_in_time";
 
-  final String checkOutTime;
+  final DateTime? checkOutTime;
   static const String checkOutTimeKey = "check_out_time";
-
-  final String id;
-  static const String idKey = "id";
 
   factory VisitorListModel.fromJson(Map<String, dynamic> json) {
     return VisitorListModel(
-      createdAt: json["createdAt"]?.toString() ?? "",
-      name: json["name"]?.toString() ?? "",
-      mobileNumber: json["mobile_number"] is num
-          ? json["mobile_number"] as num
-          : num.tryParse(json["mobile_number"]?.toString() ?? "0") ?? 0,
-      email: json["email"]?.toString() ?? "",
-      visitorType: json["visitor_type"]?.toString() ?? "",
-      project: json["project"]?.toString() ?? "",
-      purpose: json["purpose"]?.toString() ?? "",
-      status: json["status"]?.toString() ?? "",
-      checkInTime: json["check_in_time"]?.toString() ?? "",
-      checkOutTime: json["check_out_time"]?.toString() ?? "",
-      id: json["id"]?.toString() ?? "",
+      id: json["id"] ?? "",
+      name: json["name"] ?? "",
+      mobile: json["mobile"] ?? "",
+      email: json["email"] ?? "",
+      visitorType: json["visitor_type"] ?? "",
+      project: json["project"] ?? "",
+      purpose: json["purpose"] ?? "",
+      status: json["status"] ?? "",
+      createdAt: DateTime.tryParse(json["created_at"] ?? ""),
+      checkInTime: DateTime.tryParse(json["check_in_time"] ?? ""),
+      checkOutTime: DateTime.tryParse(json["check_out_time"] ?? ""),
     );
   }
 
-  static List<VisitorListModel> fromJsonList(dynamic jsonList) {
-    if (jsonList is List) {
-      return jsonList
-          .whereType<Map<String, dynamic>>()
-          .map((e) => VisitorListModel.fromJson(e))
-          .toList();
-    }
-    return [];
-  }
-
   Map<String, dynamic> toJson() => {
-    "createdAt": createdAt,
+    "id": id,
     "name": name,
-    "mobile_number": mobileNumber,
+    "mobile": mobile,
     "email": email,
     "visitor_type": visitorType,
     "project": project,
     "purpose": purpose,
     "status": status,
-    "check_in_time": checkInTime,
-    "check_out_time": checkOutTime,
-    "id": id,
+    "created_at": createdAt?.toIso8601String(),
+    "check_in_time": checkInTime?.toIso8601String(),
+    "check_out_time": checkOutTime?.toIso8601String(),
   };
+
+  @override
+  String toString() {
+    return "$id, $name, $mobile, $email, $visitorType, $project, $purpose, $status, $createdAt, $checkInTime, $checkOutTime, ";
+  }
 }
 
 /*
 [
 	{
-		"createdAt": "createdAt 1",
-		"name": "name 1",
-		"mobile_number": 1,
-		"email": "email 1",
-		"visitor_type": "visitor_type 1",
-		"project": "project 1",
-		"purpose": "purpose 1",
-		"status": "status 1",
-		"check_in_time": "check_in_time 1",
-		"check_out_time": "check_out_time 1",
-		"id": "1"
+		"id": "VIS001",
+		"name": "Rahul Sharma",
+		"mobile": "9876543210",
+		"email": "rahul@example.com",
+		"visitor_type": "Customer",
+		"project": "Project A",
+		"purpose": "Site Visit",
+		"status": "Registered",
+		"created_at": "2026-10-26T10:00:00+05:30",
+		"check_in_time": null,
+		"check_out_time": null
 	},
 	{
-		"createdAt": "createdAt 2",
-		"name": "name 2",
-		"mobile_number": 39,
-		"email": "email 2",
-		"visitor_type": "visitor_type 2",
-		"project": "project 2",
-		"purpose": "purpose 2",
-		"status": "status 2",
-		"check_in_time": "check_in_time 2",
-		"check_out_time": "check_out_time 2",
-		"id": "2"
+		"id": "VIS002",
+		"name": "Yash Vora",
+		"mobile": "0123456789",
+		"email": "Yash@example.com",
+		"visitor_type": "Customer",
+		"project": "Project B",
+		"purpose": "Site Visit",
+		"status": "Registered",
+		"created_at": "2026-10-15T10:00:00+05:30",
+		"check_in_time": "2026-10-27T10:00:00+05:30",
+		"check_out_time": null
 	},
 	{
-		"createdAt": "createdAt 3",
-		"name": "name 3",
-		"mobile_number": 3,
-		"email": "email 3",
-		"visitor_type": "visitor_type 3",
-		"project": "project 3",
-		"purpose": "purpose 3",
-		"status": "status 3",
-		"check_in_time": "check_in_time 3",
-		"check_out_time": "check_out_time 3",
-		"id": "3"
+		"id": "VIS003",
+		"name": "Jash Shah",
+		"mobile": "0127891235",
+		"email": "Jash@example.com",
+		"visitor_type": "Customer",
+		"project": "Project C",
+		"purpose": "Stay",
+		"status": "Registered",
+		"created_at": "2026-10-10T10:00:00+05:30",
+		"check_in_time": "2026-10-27T10:00:00+05:30",
+		"check_out_time": "2026-10-28T10:00:00+05:30"
 	},
 	{
-		"createdAt": "createdAt 4",
-		"name": "name 4",
-		"mobile_number": 86,
-		"email": "email 4",
-		"visitor_type": "visitor_type 4",
-		"project": "project 4",
-		"purpose": "purpose 4",
-		"status": "status 4",
-		"check_in_time": "check_in_time 4",
-		"check_out_time": "check_out_time 4",
-		"id": "4"
-	},
-	{
-		"createdAt": "createdAt 5",
-		"name": "name 5",
-		"mobile_number": 56,
-		"email": "email 5",
-		"visitor_type": "visitor_type 5",
-		"project": "project 5",
-		"purpose": "purpose 5",
-		"status": "status 5",
-		"check_in_time": "check_in_time 5",
-		"check_out_time": "check_out_time 5",
-		"id": "5"
-	},
-	{
-		"createdAt": "createdAt 6",
-		"name": "name 6",
-		"mobile_number": 63,
-		"email": "email 6",
-		"visitor_type": "visitor_type 6",
-		"project": "project 6",
-		"purpose": "purpose 6",
-		"status": "status 6",
-		"check_in_time": "check_in_time 6",
-		"check_out_time": "check_out_time 6",
-		"id": "6"
-	},
-	{
-		"createdAt": "createdAt 7",
-		"name": "name 7",
-		"mobile_number": 27,
-		"email": "email 7",
-		"visitor_type": "visitor_type 7",
-		"project": "project 7",
-		"purpose": "purpose 7",
-		"status": "status 7",
-		"check_in_time": "check_in_time 7",
-		"check_out_time": "check_out_time 7",
-		"id": "7"
+		"id": "VIS004",
+		"name": "Raj Metha",
+		"mobile": "0123456789",
+		"email": "Raj@example.com",
+		"visitor_type": "Customer",
+		"project": "Project D",
+		"purpose": "Business",
+		"status": "Registered",
+		"created_at": "2026-10-01T10:00:00+05:30",
+		"check_in_time": "2026-10-01T10:00:00+06:30",
+		"check_out_time": null
 	}
 ]*/
