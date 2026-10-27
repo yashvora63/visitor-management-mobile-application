@@ -6,6 +6,8 @@ class Routes {
 
   //static variables
   static const String bottomNavigation = '/bottom_navigation';
+  static const String visitorDetail = '/visitor_detail';
+
   static final routes = <String, WidgetBuilder>{
     bottomNavigation: (BuildContext context) => const BottomNavigation(),
   };

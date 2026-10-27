@@ -1,10 +1,24 @@
 import 'dart:async';
+import 'package:visitor_management_app/models/visitors_list/visitors_model.dart';
+import 'package:visitor_management_app/data/network/apis/visitors/visitors_api.dart';
 import 'package:visitor_management_app/data/sharedpref/shared_preference_helper.dart';
+import 'package:visitor_management_app/models/visitor_detail/visitor_detail_model.dart';
 
 class Repository {
+  final VisitorListApi _visitorListApi;
   final SharedPreferenceHelper _sharedPrefsHelper;
 
-  Repository(this._sharedPrefsHelper);
+  Repository(this._sharedPrefsHelper, this._visitorListApi);
+
+  //visitor apis
+
+  Future<List<VisitorListModel>> getVisitorList() async {
+    return await _visitorListApi.getVisitorList();
+  }
+
+  Future<VisitorDetailModel> getVisitordetail(String id) async {
+    return await _visitorListApi.getVisitordetail(id);
+  }
 
   // Authentication & Session
   Future<void> saveIsLoggedIn(bool value) =>
