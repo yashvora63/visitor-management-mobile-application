@@ -60,7 +60,7 @@ A production-ready, responsive **Visitor Management Mobile Application** built w
 
 ## 📚 Supplementary Technical Documentation
 
-For in-depth evaluation, review the dedicated technical reports in the [`docs/`](docs/) directory:
+For in-depth evaluation, review the dedicated technical reports in the [`visitor_management_app/docs/`](visitor_management_app/docs/) directory:
 - 📄 [**Assignment Scenario & Requirements Compliance Report**](visitor_management_app/docs/ASSIGNMENT_SCENARIO_COMPLIANCE_REPORT.md): Detailed item-by-item verification matrix covering Scenarios 1–6, mandatory UI components, and business rules.
 - 🌐 [**REST API Documentation & Integration Guide**](visitor_management_app/docs/API_DOCUMENTATION.md): Endpoint catalog, JSON schemas, status transition lifecycle, and terminal cURL verification commands.
 - 🏗️ [**Architecture & State Management Documentation**](visitor_management_app/docs/ARCHITECTURE_AND_STATE_MANAGEMENT.md): MVVM layer separation, MobX reactive patterns (`@observable`, `@computed`, `@action`), GetIt service locator, and error handling architecture.
@@ -354,20 +354,20 @@ Every component mandated in the assignment PDF has been implemented using idioma
 | UI Component Required | Flutter Implementation | Location in Project |
 | :--- | :--- | :--- |
 | **App Bar** | `AppBar` with title, subtitle & action icons | Every screen (`dashboard_screen.dart`, etc.) |
-| **Bottom Navigation** | `NavigationBar` / Custom Persistent Bottom Bar | [lib/screens/bottom_navigation/bottom_navigation.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/screens/bottom_navigation/bottom_navigation.dart) |
-| **Dashboard Cards** | `DashboardStatCard` with gradient accents | [lib/widgets/dashboard_stat_card.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/widgets/dashboard_stat_card.dart) |
-| **Visitor List** | `ListView.separated` / `ListView.builder` | [lib/screens/visitor_list/visitor_list_screen.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/screens/visitor_list/visitor_list_screen.dart) |
-| **Visitor Information Card** | `AppSectionCard` & Custom Visitor Card | [lib/widgets/app_section_card.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/widgets/app_section_card.dart) |
-| **Text Input** | `TextFormField` wrapped in `AppTextField` | [lib/widgets/app_text_field.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/widgets/app_text_field.dart) |
-| **Dropdown Selection** | `DropdownButtonFormField2` / `AppDropdownField`| [lib/widgets/app_dropdown_field.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/widgets/app_dropdown_field.dart) |
-| **Search Field** | `TextField` with search icon & live debounce | [lib/screens/visitor_list/visitor_list_screen.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/screens/visitor_list/visitor_list_screen.dart) |
-| **Action Buttons** | `ElevatedButton`, `OutlinedButton` | [lib/screens/visitor_registration/visitor_registration_screen.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/screens/visitor_registration/visitor_registration_screen.dart) |
+| **Bottom Navigation** | `NavigationBar` / Custom Persistent Bottom Bar | [visitor_management_app/lib/screens/bottom_navigation/bottom_navigation.dart](file:///visitor_management_app/lib/screens/bottom_navigation/bottom_navigation.dart) |
+| **Dashboard Cards** | `DashboardStatCard` with gradient accents | [visitor_management_app/lib/widgets/dashboard_stat_card.dart](file:///visitor_management_app/lib/widgets/dashboard_stat_card.dart) |
+| **Visitor List** | `ListView.separated` / `ListView.builder` | [visitor_management_app/lib/screens/visitor_list/visitor_list_screen.dart](file:///visitor_management_app/lib/screens/visitor_list/visitor_list_screen.dart) |
+| **Visitor Information Card** | `AppSectionCard` & Custom Visitor Card | [visitor_management_app/lib/widgets/app_section_card.dart](file:///visitor_management_app/lib/widgets/app_section_card.dart) |
+| **Text Input** | `TextFormField` wrapped in `AppTextField` | [visitor_management_app/lib/widgets/app_text_field.dart](file:///visitor_management_app/lib/widgets/app_text_field.dart) |
+| **Dropdown Selection** | `DropdownButtonFormField2` / `AppDropdownField`| [visitor_management_app/lib/widgets/app_dropdown_field.dart](file:///visitor_management_app/lib/widgets/app_dropdown_field.dart) |
+| **Search Field** | `TextField` with search icon & live debounce | [visitor_management_app/lib/screens/visitor_list/visitor_list_screen.dart](file:///visitor_management_app/lib/screens/visitor_list/visitor_list_screen.dart) |
+| **Action Buttons** | `ElevatedButton`, `OutlinedButton` | [visitor_management_app/lib/screens/visitor_registration/visitor_registration_screen.dart](file:///visitor_management_app/lib/screens/visitor_registration/visitor_registration_screen.dart) |
 | **Icon Buttons** | `IconButton` for edit, share, refresh, back | Across all screen app bars and cards |
 | **Status Indicators** | `Chip`, Badge containers, color-coded dots | Visitor cards and details screen |
-| **QR Code Display** | `QrImageView` (`qr_flutter`) | [lib/screens/visitor_detail/visitor_detail_screen.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/screens/visitor_detail/visitor_detail_screen.dart) |
-| **QR Scanner** | `MobileScanner` (`mobile_scanner`) | [lib/screens/qr_scanner/qr_scanner_screen.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/screens/qr_scanner/qr_scanner_screen.dart) |
+| **QR Code Display** | `QrImageView` (`qr_flutter`) | [visitor_management_app/lib/screens/visitor_detail/visitor_detail_screen.dart](file:///visitor_management_app/lib/screens/visitor_detail/visitor_detail_screen.dart) |
+| **QR Scanner** | `MobileScanner` (`mobile_scanner`) | [visitor_management_app/lib/screens/qr_scanner/qr_scanner_screen.dart](file:///visitor_management_app/lib/screens/qr_scanner/qr_scanner_screen.dart) |
 | **Confirmation Dialog**| `AlertDialog` with Confirm & Cancel | Visitor delete & scanner dialogs |
-| **Notifications** | `AppToast` & `SnackBar` (Success / Error / Info)| [lib/widgets/app_toast.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/widgets/app_toast.dart) |
+| **Notifications** | `AppToast` & `SnackBar` (Success / Error / Info)| [visitor_management_app/lib/widgets/app_toast.dart](file:///visitor_management_app/lib/widgets/app_toast.dart) |
 | **Loading Indicator** | `CircularProgressIndicator` & Skeleton Shimmer | Skeleton builders on list and dashboard |
 | **Empty State** | Centered icon, title, description & reset button | `_buildEmptyView` in visitor list |
 
@@ -380,7 +380,7 @@ Every component mandated in the assignment PDF has been implemented using idioma
 6. `VisitorPassBottomSheet`: Modal pass presentation with QR badge, download, and share actions.
 
 ### 6.3 Theme System & Color Palette
-The app incorporates a real-estate theme (Material 3) configured in [lib/constants/app_theme.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/constants/app_theme.dart) and [lib/constants/colors.dart](file:///Users/aditetechnologies/Documents/Yash/visitor%20management%20mobile%20application/visitor_management_app/lib/constants/colors.dart):
+The app incorporates a real-estate theme (Material 3) configured in [visitor_management_app/lib/constants/app_theme.dart](file:///visitor_management_app/lib/constants/app_theme.dart) and [visitor_management_app/lib/constants/colors.dart](file:///visitor_management_app/lib/constants/colors.dart):
 
 - **Light Theme**:
   - Scaffold Background: Warm Ivory (`0xFFFBFBF9`)
@@ -569,9 +569,9 @@ flutter test
 ```
 
 Test coverage includes:
-- [test/visitor_list_test.dart](file:///test/visitor_list_test.dart): Verifies JSON serialization, date parsing, and status filtering.
-- [test/visitor_registration_test.dart](file:///test/visitor_registration_test.dart): Verifies sequential `VIS001` ID generation, 10-digit mobile validation, and required field constraints.
-- [test/qr_scanner_and_checkin_test.dart](file:///test/qr_scanner_and_checkin_test.dart): Verifies QR parsing logic (plain, JSON, pipe-separated, URL) and single-session lifecycle business rules.
+- [visitor_management_app/test/visitor_list_test.dart](file:///visitor_management_app/test/visitor_list_test.dart): Verifies JSON serialization, date parsing, and status filtering.
+- [visitor_management_app/test/visitor_registration_test.dart](file:///visitor_management_app/test/visitor_registration_test.dart): Verifies sequential `VIS001` ID generation, 10-digit mobile validation, and required field constraints.
+- [visitor_management_app/test/qr_scanner_and_checkin_test.dart](file:///visitor_management_app/test/qr_scanner_and_checkin_test.dart): Verifies QR parsing logic (plain, JSON, pipe-separated, URL) and single-session lifecycle business rules.
 
 ---
 
@@ -610,7 +610,7 @@ flutter build apk --release
 
 The application requires camera access to scan visitor QR codes and internet access to communicate with the REST API.
 
-### Android Manifest (`android/app/src/main/AndroidManifest.xml`)
+### Android Manifest (`visitor_management_app/android/app/src/main/AndroidManifest.xml`)
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Internet permission for Mock REST API integration -->
@@ -624,14 +624,14 @@ The application requires camera access to scan visitor QR codes and internet acc
 ```
 
 ### Runtime Permission Handling
-Camera permissions are requested dynamically via `permission_handler` inside [lib/screens/qr_scanner/qr_scanner_screen.dart](file:///lib/screens/qr_scanner/qr_scanner_screen.dart):
+Camera permissions are requested dynamically via `permission_handler` inside [visitor_management_app/lib/screens/qr_scanner/qr_scanner_screen.dart](file:///visitor_management_app/lib/screens/qr_scanner/qr_scanner_screen.dart):
 - If permission is denied, a descriptive UI message with an "Open Settings" shortcut is presented so the user can grant permission smoothly.
 
 ---
 
 ## 11. Packages & Dependencies
 
-All dependencies are pinned in [pubspec.yaml](file:///pubspec.yaml):
+All dependencies are pinned in [pubspec.yaml](file:///visitor_management_app/pubspec.yaml):
 
 | Package | Version | Purpose in Application |
 | :--- | :--- | :--- |
@@ -663,12 +663,12 @@ Below is the visual overview of all mandatory screens in the application:
 
 | 1. Dashboard Screen | 2. Visitor List Screen | 3. Visitor Registration |
 | :---: | :---: | :---: |
-| ![Dashboard](screenshots/dashboard.png) | ![Visitor List](screenshots/visitor_list.png) | ![Registration](screenshots/visitor_registration.png) |
+| ![Dashboard](visitor_management_app/screenshots/dashboard.png) | ![Visitor List](visitor_management_app/screenshots/visitor_list.png) | ![Registration](visitor_management_app/screenshots/visitor_registration.png) |
 | *Live metrics, shortcuts & recent visits* | *Search, filter chips & visitor cards* | *Form validations & dropdown selectors* |
 
 | 4. Visitor Details & QR Pass | 5. Camera QR Scanner | 6. Onboarding Preview |
 | :---: | :---: | :---: |
-| ![Visitor Details](screenshots/visitor_details_qr.png) | ![QR Scanner](screenshots/qr_scanner.png) | ![Preview](screenshots/preview.png) |
+| ![Visitor Details](visitor_management_app/screenshots/visitor_details_qr.png) | ![QR Scanner](visitor_management_app/screenshots/qr_scanner.png) | ![Preview](visitor_management_app/screenshots/preview.png) |
 | *Digital pass, vector QR & check-in action* | *Viewfinder, animated laser & modal trigger* | *Walkthrough carousel with navigation* |
 
 > *Note: Screenshot image files can be viewed or captured into the `screenshots/` directory. All screens are fully implemented and testable in the APK.*
@@ -717,9 +717,9 @@ In compliance with the assignment scope, the following limitations are documente
 ## 16. Supplementary Technical Documentation
 
 For deeper architectural, compliance, and API details, refer to:
-- [docs/ASSIGNMENT_SCENARIO_COMPLIANCE_REPORT.md](docs/ASSIGNMENT_SCENARIO_COMPLIANCE_REPORT.md): Line-by-line verification of Scenarios 1–6, business rules, and UI requirements.
-- [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md): Complete MockAPI endpoint catalog, JSON schemas, payload examples, and cURL commands.
-- [docs/ARCHITECTURE_AND_STATE_MANAGEMENT.md](docs/ARCHITECTURE_AND_STATE_MANAGEMENT.md): MVVM architecture, MobX reactive state engine, and GetIt service locator patterns.
+- [visitor_management_app/docs/ASSIGNMENT_SCENARIO_COMPLIANCE_REPORT.md](visitor_management_app/docs/ASSIGNMENT_SCENARIO_COMPLIANCE_REPORT.md): Line-by-line verification of Scenarios 1–6, business rules, and UI requirements.
+- [visitor_management_app/docs/API_DOCUMENTATION.md](visitor_management_app/docs/API_DOCUMENTATION.md): Complete MockAPI endpoint catalog, JSON schemas, payload examples, and cURL commands.
+- [visitor_management_app/docs/ARCHITECTURE_AND_STATE_MANAGEMENT.md](visitor_management_app/docs/ARCHITECTURE_AND_STATE_MANAGEMENT.md): MVVM architecture, MobX reactive state engine, and GetIt service locator patterns.
 
 ---
 
