@@ -14,21 +14,49 @@ import '../visitor_registration/visitor_registration_screen.dart';
 import '../qr_scanner/qr_scanner_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
+  final bool isActive;
   final void Function(int index)? onNavigateTab;
 
-  const DashboardScreen({super.key, this.onNavigateTab});
+  const DashboardScreen({
+    super.key,
+    this.isActive = true,
+    this.onNavigateTab,
+  });
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with WidgetsBindingObserver {
   final VisitorListStore _visitorListStore = getIt<VisitorListStore>();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _fetchVisitors();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && widget.isActive) {
+      _fetchVisitors();
+    }
+  }
+
+  @override
+  void didUpdateWidget(DashboardScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      _fetchVisitors();
+    }
   }
 
   Future<void> _fetchVisitors() async {
@@ -39,7 +67,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  void _navigateToTab(int index, {String? statusFilter}) {
+  Future<void> _navigateToTab(int index, {String? statusFilter}) async {
     if (statusFilter != null) {
       _visitorListStore.filterByStatus(statusFilter);
     }
@@ -60,7 +88,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         default:
           return;
       }
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => target));
+      await Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => target));
+      if (mounted) {
+        _fetchVisitors();
+      }
     }
   }
 
@@ -634,8 +666,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(
+        onTap: () async {
+          await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) => VisitorDetailScreen(
                 visitorId: visitor.id,
@@ -643,6 +675,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
           );
+          if (mounted) {
+            _fetchVisitors();
+          }
         },
         borderRadius: BorderRadius.circular(16),
         child: Container(

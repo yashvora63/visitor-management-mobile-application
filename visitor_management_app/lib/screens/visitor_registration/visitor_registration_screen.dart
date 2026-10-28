@@ -121,10 +121,15 @@ class _VisitorRegistrationScreenState extends State<VisitorRegistrationScreen> {
 
       if (!mounted) return;
 
-      // Sync visitor list in real-time
+      // Immediately update MobX store in memory for instant dashboard reactivity
+      _visitorListStore.addOrUpdateVisitor(created);
+
+      // Sync visitor list with server in real-time
       try {
         await _visitorListStore.getVisitorList();
       } catch (_) {}
+
+      if (!mounted) return;
 
       widget.onRegistrationSuccess?.call();
 

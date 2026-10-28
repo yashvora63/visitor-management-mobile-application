@@ -364,6 +364,18 @@ mixin _$VisitorListStore on _VisitorListStore, Store {
   }
 
   @override
+  void addOrUpdateVisitor(VisitorListModel visitor) {
+    final _$actionInfo = _$_VisitorListStoreActionController.startAction(
+      name: '_VisitorListStore.addOrUpdateVisitor',
+    );
+    try {
+      return super.addOrUpdateVisitor(visitor);
+    } finally {
+      _$_VisitorListStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 fetchVisitorListFuture: ${fetchVisitorListFuture},

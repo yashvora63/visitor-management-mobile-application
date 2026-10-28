@@ -380,8 +380,8 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
-        onTap: () {
-          Navigator.of(context).push(
+        onTap: () async {
+          await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) => VisitorDetailScreen(
                 visitorId: visitor.id,
@@ -389,6 +389,9 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
               ),
             ),
           );
+          if (mounted) {
+            _fetchVisitors();
+          }
         },
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -610,8 +613,8 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                     tooltip: 'Edit Visitor',
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    onPressed: () {
-                      Navigator.of(context).push(
+                    onPressed: () async {
+                      await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => VisitorRegistrationScreen(
                             visitorToEdit: visitor,
@@ -619,6 +622,9 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                           ),
                         ),
                       );
+                      if (mounted) {
+                        _fetchVisitors();
+                      }
                     },
                   ),
                   const SizedBox(width: 6),

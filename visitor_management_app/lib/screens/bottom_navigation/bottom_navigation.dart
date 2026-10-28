@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../constants/colors.dart';
 import '../../constants/strings.dart';
+import '../../di/components/service_locator.dart';
+import '../../stores/visitor_list/visitor_list_store.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../visitor_list/visitor_list_screen.dart';
 import '../visitor_registration/visitor_registration_screen.dart';
@@ -18,6 +20,7 @@ class BottomNavigation extends StatefulWidget {
 
 class _BottomNavigationState extends State<BottomNavigation> {
   late int _currentIndex;
+  final VisitorListStore _visitorListStore = getIt<VisitorListStore>();
 
   @override
   void initState() {
@@ -26,6 +29,10 @@ class _BottomNavigationState extends State<BottomNavigation> {
   }
 
   void _onTabTapped(int index) {
+    if (index == 0) {
+      // Refresh dashboard whenever tapped or navigated to
+      _visitorListStore.getVisitorList();
+    }
     if (_currentIndex != index) {
       setState(() {
         _currentIndex = index;
@@ -142,7 +149,10 @@ class _BottomNavigationState extends State<BottomNavigation> {
         body: IndexedStack(
           index: _currentIndex,
           children: [
-            DashboardScreen(onNavigateTab: _onTabTapped),
+            DashboardScreen(
+              isActive: _currentIndex == 0,
+              onNavigateTab: _onTabTapped,
+            ),
             const VisitorListScreen(),
             const VisitorRegistrationScreen(),
             QrScannerScreen(isActive: _currentIndex == 3),

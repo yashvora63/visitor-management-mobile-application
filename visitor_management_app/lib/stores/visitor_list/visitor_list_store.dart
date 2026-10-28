@@ -117,11 +117,12 @@ abstract class _VisitorListStore with Store {
   }
 
   int get totalVisitorsToday {
-    final parsedCount =
-        _allVisitors.where((v) => _isSameDayAsToday(v.createdAt.toString())).length;
+    final parsedCount = _allVisitors
+        .where((v) => _isSameDayAsToday(v.createdAt?.toIso8601String()))
+        .length;
     if (parsedCount > 0) return parsedCount;
     final hasAnyValidDate =
-        _allVisitors.any((v) => DateTime.tryParse(v.createdAt.toString().trim()) != null);
+        _allVisitors.any((v) => v.createdAt != null);
     if (!hasAnyValidDate && _allVisitors.isNotEmpty) {
       return _allVisitors.length;
     }
@@ -138,11 +139,12 @@ abstract class _VisitorListStore with Store {
           status == 'status 2';
     }).toList();
 
-    final parsedCount =
-        checkedOutList.where((v) => _isSameDayAsToday(v.checkOutTime.toString())).length;
+    final parsedCount = checkedOutList
+        .where((v) => _isSameDayAsToday(v.checkOutTime?.toIso8601String()))
+        .length;
     if (parsedCount > 0) return parsedCount;
     final hasAnyValidDate = checkedOutList.any(
-      (v) => DateTime.tryParse(v.checkOutTime.toString().trim()) != null,
+      (v) => v.checkOutTime != null,
     );
     if (!hasAnyValidDate && checkedOutList.isNotEmpty) {
       return checkedOutList.length;
@@ -255,13 +257,15 @@ abstract class _VisitorListStore with Store {
     try {
       final updated = await future;
 
-      // Update in _allVisitors
-      final idx = _allVisitors.indexWhere((v) => v.id == id);
+      // Update in _allVisitors immutably to trigger MobX reaction
+      final nextVisitors = List<VisitorListModel>.from(_allVisitors);
+      final idx = nextVisitors.indexWhere((v) => v.id == id);
       if (idx != -1) {
-        _allVisitors[idx] = updated;
+        nextVisitors[idx] = updated;
       } else {
-        _allVisitors.add(updated);
+        nextVisitors.add(updated);
       }
+      _allVisitors = nextVisitors;
 
       // Update visitorDetail if viewing
       if (visitorDetail != null && visitorDetail!.id == id) {
@@ -343,13 +347,15 @@ abstract class _VisitorListStore with Store {
     try {
       final updated = await future;
 
-      // Update in _allVisitors
-      final idx = _allVisitors.indexWhere((v) => v.id == id);
+      // Update in _allVisitors immutably to trigger MobX reaction
+      final nextVisitors = List<VisitorListModel>.from(_allVisitors);
+      final idx = nextVisitors.indexWhere((v) => v.id == id);
       if (idx != -1) {
-        _allVisitors[idx] = updated;
+        nextVisitors[idx] = updated;
       } else {
-        _allVisitors.add(updated);
+        nextVisitors.add(updated);
       }
+      _allVisitors = nextVisitors;
 
       // Update visitorDetail if viewing
       if (visitorDetail != null && visitorDetail!.id == id) {
@@ -411,6 +417,19 @@ abstract class _VisitorListStore with Store {
   @action
   void setVisitors(List<VisitorListModel> list) {
     _allVisitors = list;
+    _applyFilterAndSearch();
+  }
+
+  @action
+  void addOrUpdateVisitor(VisitorListModel visitor) {
+    final nextVisitors = List<VisitorListModel>.from(_allVisitors);
+    final idx = nextVisitors.indexWhere((v) => v.id == visitor.id);
+    if (idx != -1) {
+      nextVisitors[idx] = visitor;
+    } else {
+      nextVisitors.add(visitor);
+    }
+    _allVisitors = nextVisitors;
     _applyFilterAndSearch();
   }
 
