@@ -3,6 +3,7 @@ import 'package:visitor_management_app/widgets/app_toast.dart';
 import 'package:visitor_management_app/stores/error/error_store.dart';
 import 'package:visitor_management_app/utils/dio/dio_error_util.dart';
 import 'package:visitor_management_app/di/components/service_locator.dart';
+import 'package:visitor_management_app/widgets/progress_indicator_widget.dart';
 
 class DioClient {
   final Dio _dio;
@@ -31,6 +32,8 @@ class DioClient {
         AppToast.showError(message: DioErrorUtil.handleError(e));
       }
       rethrow;
+    } finally {
+      ShowToastDialog.closeLoader();
     }
   }
 
@@ -44,6 +47,7 @@ class DioClient {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
+    ShowToastDialog.showLoader("Saving...");
     try {
       final Response response = await _dio.post(
         uri,
@@ -60,6 +64,8 @@ class DioClient {
         AppToast.showError(message: DioErrorUtil.handleError(e));
       }
       rethrow;
+    } finally {
+      ShowToastDialog.closeLoader();
     }
   }
 
@@ -73,6 +79,7 @@ class DioClient {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
+    ShowToastDialog.showLoader("Updating...");
     try {
       final Response response = await _dio.put(
         uri,
@@ -90,6 +97,8 @@ class DioClient {
         AppToast.showError(message: DioErrorUtil.handleError(e));
       }
       rethrow;
+    } finally {
+      ShowToastDialog.closeLoader();
     }
   }
 
@@ -103,6 +112,7 @@ class DioClient {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
+    ShowToastDialog.showLoader("Updating status...");
     try {
       final Response response = await _dio.patch(
         uri,
@@ -120,6 +130,8 @@ class DioClient {
         AppToast.showError(message: DioErrorUtil.handleError(e));
       }
       rethrow;
+    } finally {
+      ShowToastDialog.closeLoader();
     }
   }
 
@@ -131,6 +143,7 @@ class DioClient {
     Options? options,
     CancelToken? cancelToken,
   }) async {
+    ShowToastDialog.showLoader("Deleting...");
     try {
       final Response response = await _dio.delete(
         uri,
@@ -145,6 +158,8 @@ class DioClient {
         AppToast.showError(message: DioErrorUtil.handleError(e));
       }
       rethrow;
+    } finally {
+      ShowToastDialog.closeLoader();
     }
   }
 }

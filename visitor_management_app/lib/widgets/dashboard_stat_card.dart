@@ -100,7 +100,7 @@ class DashboardStatCard extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   color: textPrimary,
                 ),
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               if (subtitle != null) ...[

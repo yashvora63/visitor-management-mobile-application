@@ -469,24 +469,42 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
+                            IconButton(
+                              icon: Icon(
+                                Icons.edit_outlined,
+                                size: 18,
+                                color: primaryGold,
                               ),
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.06)
-                                    : Colors.black.withValues(alpha: 0.04),
-                                borderRadius: BorderRadius.circular(5),
+                              tooltip: 'Edit Visitor',
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () async {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => VisitorRegistrationScreen(
+                                      visitorToEdit: visitor,
+                                      onRegistrationSuccess: _fetchVisitors,
+                                    ),
+                                  ),
+                                );
+                                if (mounted) {
+                                  _fetchVisitors();
+                                }
+                              },
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline_rounded,
+                                size: 18,
+                                color: AppColors.errorRed,
                               ),
-                              child: Text(
-                                '#${visitor.id}',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: textSecondary,
-                                ),
+                              tooltip: 'Delete Visitor',
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () => _showDeleteConfirmationDialog(
+                                context,
+                                visitor,
                               ),
                             ),
                           ],
@@ -545,9 +563,9 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                 ],
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 17),
               const Divider(height: 1, thickness: 0.6),
-              const SizedBox(height: 10),
+              const SizedBox(height: 15),
 
               // Middle Details Row: Project, Status Badge, and Chevron
               Row(
@@ -604,44 +622,7 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  IconButton(
-                    icon: Icon(
-                      Icons.edit_outlined,
-                      size: 18,
-                      color: primaryGold,
-                    ),
-                    tooltip: 'Edit Visitor',
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () async {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => VisitorRegistrationScreen(
-                            visitorToEdit: visitor,
-                            onRegistrationSuccess: _fetchVisitors,
-                          ),
-                        ),
-                      );
-                      if (mounted) {
-                        _fetchVisitors();
-                      }
-                    },
-                  ),
                   const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline_rounded,
-                      size: 18,
-                      color: AppColors.errorRed,
-                    ),
-                    tooltip: 'Delete Visitor',
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () =>
-                        _showDeleteConfirmationDialog(context, visitor),
-                  ),
-                  const SizedBox(width: 6),
                   Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 12,

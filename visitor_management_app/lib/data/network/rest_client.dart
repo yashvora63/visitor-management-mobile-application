@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'constants/endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'exceptions/network_exceptions.dart';
+import 'package:visitor_management_app/widgets/progress_indicator_widget.dart';
 
 class RestClient {
   // instantiate json decoder for json serialization
@@ -10,7 +11,10 @@ class RestClient {
 
   // Get:-----------------------------------------------------------------------
   Future<dynamic> get(String path) {
-    return http.get(Uri.https(Endpoints.baseUrl, path)).then(_createResponse);
+    return http
+        .get(Uri.https(Endpoints.baseUrl, path))
+        .then(_createResponse)
+        .whenComplete(() => ShowToastDialog.closeLoader());
   }
 
   // Post:----------------------------------------------------------------------
@@ -20,6 +24,7 @@ class RestClient {
     body,
     encoding,
   }) {
+    ShowToastDialog.showLoader("Saving...");
     return http
         .post(
           Uri.https(Endpoints.baseUrl, path),
@@ -27,7 +32,8 @@ class RestClient {
           headers: headers,
           encoding: encoding,
         )
-        .then(_createResponse);
+        .then(_createResponse)
+        .whenComplete(() => ShowToastDialog.closeLoader());
   }
 
   // Put:----------------------------------------------------------------------
@@ -37,6 +43,7 @@ class RestClient {
     body,
     encoding,
   }) {
+    ShowToastDialog.showLoader("Updating...");
     return http
         .put(
           Uri.https(Endpoints.baseUrl, path),
@@ -44,7 +51,8 @@ class RestClient {
           headers: headers,
           encoding: encoding,
         )
-        .then(_createResponse);
+        .then(_createResponse)
+        .whenComplete(() => ShowToastDialog.closeLoader());
   }
 
   // Delete:----------------------------------------------------------------------
@@ -54,6 +62,7 @@ class RestClient {
     body,
     encoding,
   }) {
+    ShowToastDialog.showLoader("Deleting...");
     return http
         .delete(
           Uri.https(Endpoints.baseUrl, path),
@@ -61,7 +70,8 @@ class RestClient {
           headers: headers,
           encoding: encoding,
         )
-        .then(_createResponse);
+        .then(_createResponse)
+        .whenComplete(() => ShowToastDialog.closeLoader());
   }
 
   // Response:------------------------------------------------------------------
