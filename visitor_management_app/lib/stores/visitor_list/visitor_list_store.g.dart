@@ -298,6 +298,16 @@ mixin _$VisitorListStore on _VisitorListStore, Store {
     return _$checkOutVisitorAsyncAction.run(() => super.checkOutVisitor(id));
   }
 
+  late final _$deleteVisitorAsyncAction = AsyncAction(
+    '_VisitorListStore.deleteVisitor',
+    context: context,
+  );
+
+  @override
+  Future<bool> deleteVisitor(String id) {
+    return _$deleteVisitorAsyncAction.run(() => super.deleteVisitor(id));
+  }
+
   late final _$_VisitorListStoreActionController = ActionController(
     name: '_VisitorListStore',
     context: context,

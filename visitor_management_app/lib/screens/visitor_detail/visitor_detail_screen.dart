@@ -205,6 +205,15 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
             onPressed: _fetchDetail,
           ),
           IconButton(
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              color: AppColors.errorRed,
+              size: 21,
+            ),
+            tooltip: 'Delete Visitor',
+            onPressed: () => _confirmDeleteVisitor(context),
+          ),
+          IconButton(
             icon: _isSharing
                 ? const SizedBox(
                     width: 18,
@@ -570,6 +579,101 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
     return _visitorListStore.visitorDetail?.status ??
         widget.initialVisitor?.status ??
         'Registered';
+  }
+
+  void _confirmDeleteVisitor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dialogBg = isDark ? AppColors.darkCardBg : AppColors.lightCardBg;
+    final textPrimary = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
+    final name = _getName();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: dialogBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        icon: Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: AppColors.errorRed.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.delete_outline_rounded,
+            color: AppColors.errorRed,
+            size: 28,
+          ),
+        ),
+        title: Text(
+          Strings.deleteConfirmTitle,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: textPrimary,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to delete visitor "$name" (#${widget.visitorId})? This action cannot be undone.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 13, color: textSecondary, height: 1.4),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actions: [
+          OutlinedButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: textSecondary,
+              side: BorderSide(
+                color: isDark
+                    ? AppColors.darkCardBorder
+                    : AppColors.lightBorder,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            ),
+            child: const Text(
+              Strings.cancel,
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              try {
+                await _visitorListStore.deleteVisitor(widget.visitorId);
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
+                AppToast.showSuccess(message: '$name deleted successfully.');
+              } catch (e) {
+                AppToast.showError(message: 'Failed to delete visitor: $e');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.errorRed,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: const Text(
+              Strings.delete,
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // ================= Check-In / Check-Out Actions =================

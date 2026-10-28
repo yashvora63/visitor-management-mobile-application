@@ -26,6 +26,10 @@ class Repository {
     return await _visitorListApi.getVisitordetail(id);
   }
 
+  Future<bool> deleteVisitor(String id) async {
+    return await _visitorListApi.deleteVisitor(id);
+  }
+
   Future<VisitorListModel> registerVisitor(Map<String, dynamic> data) async {
     return await _visitorRegistrationApi.registerVisitor(data);
   }

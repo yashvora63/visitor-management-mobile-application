@@ -54,6 +54,16 @@ A production-ready, responsive **Visitor Management Mobile Application** built w
 - [13. Optional / Bonus Features Implemented](#13-optional--bonus-features-implemented)
 - [14. Known Limitations](#14-known-limitations)
 - [15. Assignment Evaluation Matrix Compliance](#15-assignment-evaluation-matrix-compliance)
+- [16. Supplementary Technical Documentation](#16-supplementary-technical-documentation)
+
+---
+
+## 📚 Supplementary Technical Documentation
+
+For in-depth evaluation, review the dedicated technical reports in the [`docs/`](docs/) directory:
+- 📄 [**Assignment Scenario & Requirements Compliance Report**](docs/ASSIGNMENT_SCENARIO_COMPLIANCE_REPORT.md): Detailed item-by-item verification matrix covering Scenarios 1–6, mandatory UI components, and business rules.
+- 🌐 [**REST API Documentation & Integration Guide**](docs/API_DOCUMENTATION.md): Endpoint catalog, JSON schemas, status transition lifecycle, and terminal cURL verification commands.
+- 🏗️ [**Architecture & State Management Documentation**](docs/ARCHITECTURE_AND_STATE_MANAGEMENT.md): MVVM layer separation, MobX reactive patterns (`@observable`, `@computed`, `@action`), GetIt service locator, and error handling architecture.
 
 ---
 
@@ -129,6 +139,10 @@ visitor_management_app/
 ├── build/app/outputs/flutter-apk/# Generated installable APK artifacts
 │   ├── app-debug.apk             # Debug build
 │   └── app-release.apk           # Optimized release build
+├── docs/                         # Detailed Technical & Evaluation Documentation
+│   ├── ASSIGNMENT_SCENARIO_COMPLIANCE_REPORT.md # Item-by-item assignment audit
+│   ├── API_DOCUMENTATION.md      # MockAPI endpoints, schemas & cURL commands
+│   └── ARCHITECTURE_AND_STATE_MANAGEMENT.md # MVVM + MobX architecture guide
 ├── lib/
 │   ├── constants/                # Design tokens, theme palettes, string literals
 │   │   ├── app_theme.dart        # Light (Warm White & Gold) and Dark (Obsidian)
@@ -697,6 +711,15 @@ In compliance with the assignment scope, the following limitations are documente
 | **Functional Logic** | Strict single-session workflow (`Registered -> Checked In -> Checked Out`), 10-digit phone validation, no duplicate check-ins. | ✅ **100% Complete** |
 | **Code Quality** | Clean MVVM layer separation, GetIt service locator, idiomatic Dart, strong type safety, comprehensive test suite. | ✅ **100% Complete** |
 | **Documentation** | Comprehensive README, API details, setup instructions, pre-built APK paths, architecture diagrams. | ✅ **100% Complete** |
+
+---
+
+## 16. Supplementary Technical Documentation
+
+For deeper architectural, compliance, and API details, refer to:
+- [docs/ASSIGNMENT_SCENARIO_COMPLIANCE_REPORT.md](docs/ASSIGNMENT_SCENARIO_COMPLIANCE_REPORT.md): Line-by-line verification of Scenarios 1–6, business rules, and UI requirements.
+- [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md): Complete MockAPI endpoint catalog, JSON schemas, payload examples, and cURL commands.
+- [docs/ARCHITECTURE_AND_STATE_MANAGEMENT.md](docs/ARCHITECTURE_AND_STATE_MANAGEMENT.md): MVVM architecture, MobX reactive state engine, and GetIt service locator patterns.
 
 ---
 

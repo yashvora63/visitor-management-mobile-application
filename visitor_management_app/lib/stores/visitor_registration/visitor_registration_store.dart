@@ -60,6 +60,8 @@ abstract class _VisitorRegistrationStore with Store {
   // Static options
   final List<String> visitorTypes = const ['Customer', 'Vendor', 'Other'];
 
+  final List<String> projects = const ['Project A', 'Project B', 'Project C'];
+
   final List<String> commonPurposes = const [
     'Site Visit',
     'Meeting',
@@ -104,7 +106,7 @@ abstract class _VisitorRegistrationStore with Store {
       name = visitor.name;
       mobile = visitor.mobile;
       email = visitor.email;
-      project = visitor.project;
+      project = visitor.project.isNotEmpty ? visitor.project : 'Project A';
       purpose = visitor.purpose;
       if (visitorTypes.contains(visitor.visitorType)) {
         selectedVisitorType = visitor.visitorType;
@@ -122,7 +124,7 @@ abstract class _VisitorRegistrationStore with Store {
     name = '';
     mobile = '';
     email = '';
-    project = '';
+    project = 'Project A';
     purpose = '';
     selectedVisitorType = 'Customer';
     status = Strings.statusRegistered;

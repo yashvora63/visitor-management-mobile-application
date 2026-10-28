@@ -394,6 +394,33 @@ abstract class _VisitorListStore with Store {
   }
 
   @action
+  Future<bool> deleteVisitor(String id) async {
+    final future = _repository.deleteVisitor(id);
+    try {
+      final res = await future;
+
+      final nextVisitors = List<VisitorListModel>.from(_allVisitors);
+      nextVisitors.removeWhere((v) => v.id == id);
+      _allVisitors = nextVisitors;
+
+      if (visitorDetail != null && visitorDetail!.id == id) {
+        visitorDetail = null;
+      }
+
+      _applyFilterAndSearch();
+      successStore.successMessage = 'Visitor record deleted successfully';
+      return res;
+    } catch (err) {
+      if (err is DioException) {
+        errorStore.errorMessage = DioErrorUtil.handleError(err);
+      } else {
+        errorStore.errorMessage = err.toString();
+      }
+      rethrow;
+    }
+  }
+
+  @action
   void searchVisitor(String query) {
     searchQuery = query;
     _applyFilterAndSearch();

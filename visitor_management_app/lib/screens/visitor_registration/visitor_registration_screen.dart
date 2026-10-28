@@ -357,19 +357,35 @@ class _VisitorRegistrationScreenState extends State<VisitorRegistrationScreen> {
 
                       const SizedBox(height: 14),
 
-                      // Project Input Field (Text Input instead of dropdown)
-                      AppTextField(
-                        controller: _projectController,
-                        label: 'Project *',
-                        hint: 'Enter project name',
-                        icon: Icons.domain_rounded,
-                        keyboardType: TextInputType.text,
-                        textCapitalization: TextCapitalization.words,
-                        validator: (val) {
-                          if (val == null || val.trim().isEmpty) {
-                            return 'Project name is required.';
-                          }
-                          return null;
+                      // Project Dropdown (Project A, Project B, Project C per Assignment Requirements)
+                      Observer(
+                        builder: (_) {
+                          final currentProject =
+                              _registrationStore.project.isNotEmpty
+                              ? _registrationStore.project
+                              : _registrationStore.projects.first;
+                          final items =
+                              _registrationStore.projects.contains(
+                                currentProject,
+                              )
+                              ? _registrationStore.projects
+                              : [
+                                  currentProject,
+                                  ..._registrationStore.projects,
+                                ];
+
+                          return AppDropdownField<String>(
+                            label: 'Project *',
+                            value: currentProject,
+                            icon: Icons.domain_rounded,
+                            items: items,
+                            onChanged: (val) {
+                              if (val != null) {
+                                _registrationStore.setProject(val);
+                                _projectController.text = val;
+                              }
+                            },
+                          );
                         },
                       ),
 

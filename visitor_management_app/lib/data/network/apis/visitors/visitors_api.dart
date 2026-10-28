@@ -38,4 +38,14 @@ class VisitorListApi {
       throw DioErrorUtil.handleError(err);
     }
   }
+
+  Future<bool> deleteVisitor(String id) async {
+    try {
+      final url = "${Endpoints.visitors}/$id";
+      await _dioClient.delete(url);
+      return true;
+    } on DioException catch (err) {
+      throw DioErrorUtil.handleError(err);
+    }
+  }
 }

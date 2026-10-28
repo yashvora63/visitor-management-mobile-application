@@ -202,6 +202,20 @@ void main() {
         throwsA(contains('already checked out')),
       );
     });
+
+    test('Successfully deletes visitor and updates local store count', () async {
+      visitorListStore.setVisitors([registeredVisitor]);
+      expect(visitorListStore.allVisitors.length, 1);
+
+      when(() => mockRepository.deleteVisitor('VIS101'))
+          .thenAnswer((_) async => true);
+
+      final success = await visitorListStore.deleteVisitor('VIS101');
+
+      expect(success, isTrue);
+      expect(visitorListStore.allVisitors.isEmpty, isTrue);
+      expect(visitorListStore.totalVisitors, 0);
+    });
   });
 }
 
