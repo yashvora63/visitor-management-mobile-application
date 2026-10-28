@@ -112,7 +112,6 @@ class DioClient {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    ShowToastDialog.showLoader("Updating status...");
     try {
       final Response response = await _dio.patch(
         uri,
