@@ -61,9 +61,9 @@ A production-ready, responsive **Visitor Management Mobile Application** built w
 ## 📚 Supplementary Technical Documentation
 
 For in-depth evaluation, review the dedicated technical reports in the [`docs/`](docs/) directory:
-- 📄 [**Assignment Scenario & Requirements Compliance Report**](docs/ASSIGNMENT_SCENARIO_COMPLIANCE_REPORT.md): Detailed item-by-item verification matrix covering Scenarios 1–6, mandatory UI components, and business rules.
-- 🌐 [**REST API Documentation & Integration Guide**](docs/API_DOCUMENTATION.md): Endpoint catalog, JSON schemas, status transition lifecycle, and terminal cURL verification commands.
-- 🏗️ [**Architecture & State Management Documentation**](docs/ARCHITECTURE_AND_STATE_MANAGEMENT.md): MVVM layer separation, MobX reactive patterns (`@observable`, `@computed`, `@action`), GetIt service locator, and error handling architecture.
+- 📄 [**Assignment Scenario & Requirements Compliance Report**](visitor_management_app/docs/ASSIGNMENT_SCENARIO_COMPLIANCE_REPORT.md): Detailed item-by-item verification matrix covering Scenarios 1–6, mandatory UI components, and business rules.
+- 🌐 [**REST API Documentation & Integration Guide**](visitor_management_app/docs/API_DOCUMENTATION.md): Endpoint catalog, JSON schemas, status transition lifecycle, and terminal cURL verification commands.
+- 🏗️ [**Architecture & State Management Documentation**](visitor_management_app/docs/ARCHITECTURE_AND_STATE_MANAGEMENT.md): MVVM layer separation, MobX reactive patterns (`@observable`, `@computed`, `@action`), GetIt service locator, and error handling architecture.
 
 ---
 
