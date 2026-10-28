@@ -18,18 +18,11 @@ class BottomNavigation extends StatefulWidget {
 
 class _BottomNavigationState extends State<BottomNavigation> {
   late int _currentIndex;
-  late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    _screens = [
-      DashboardScreen(onNavigateTab: _onTabTapped),
-      const VisitorListScreen(),
-      const VisitorRegistrationScreen(),
-      const QrScannerScreen(),
-    ];
   }
 
   void _onTabTapped(int index) {
@@ -75,7 +68,9 @@ class _BottomNavigationState extends State<BottomNavigation> {
             child: Text(
               Strings.cancel,
               style: TextStyle(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -85,10 +80,15 @@ class _BottomNavigationState extends State<BottomNavigation> {
               backgroundColor: primaryGold,
               foregroundColor: isDark ? AppColors.darkScaffoldBg : Colors.white,
               minimumSize: const Size(90, 42),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Exit', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Exit',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -102,7 +102,9 @@ class _BottomNavigationState extends State<BottomNavigation> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryGold = isDark ? AppColors.goldLight : AppColors.primaryGold;
     final navBg = isDark ? AppColors.darkNavBg : AppColors.lightCardBg;
-    final inactiveColor = isDark ? AppColors.darkTextMuted : AppColors.lightTextHint;
+    final inactiveColor = isDark
+        ? AppColors.darkTextMuted
+        : AppColors.lightTextHint;
 
     final navItems = [
       _NavItemData(
@@ -139,7 +141,12 @@ class _BottomNavigationState extends State<BottomNavigation> {
       child: Scaffold(
         body: IndexedStack(
           index: _currentIndex,
-          children: _screens,
+          children: [
+            DashboardScreen(onNavigateTab: _onTabTapped),
+            const VisitorListScreen(),
+            const VisitorRegistrationScreen(),
+            QrScannerScreen(isActive: _currentIndex == 3),
+          ],
         ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
@@ -181,8 +188,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? (isDark
-                                ? AppColors.goldContainerDark
-                                : AppColors.goldContainerLight)
+                                  ? AppColors.goldContainerDark
+                                  : AppColors.goldContainerLight)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(16),
                         border: isSelected

@@ -1,3 +1,6 @@
 {
-  "app_name": "विज़िटर मैनेजमेंट"
+  "app_name": "विज़िटर मैनेजमेंट ऐप",
+  "error_title_text": "त्रुटि",
+  "success_title_text": "सफलता",
+  "warning_title_text": "चेतावनी"
 }

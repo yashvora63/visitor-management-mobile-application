@@ -6,6 +6,7 @@ import 'package:visitor_management_app/constants/strings.dart';
 import 'package:visitor_management_app/di/components/service_locator.dart';
 import 'package:visitor_management_app/models/visitors_list/visitors_model.dart';
 import 'package:visitor_management_app/screens/visitor_detail/visitor_detail_screen.dart';
+import 'package:visitor_management_app/screens/visitor_registration/visitor_registration_screen.dart';
 import 'package:visitor_management_app/stores/visitor_list/visitor_list_store.dart';
 
 class VisitorListScreen extends StatefulWidget {
@@ -598,6 +599,27 @@ class _VisitorListScreenState extends State<VisitorListScreen> {
                         ),
                       ],
                     ),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 18,
+                      color: primaryGold,
+                    ),
+                    tooltip: 'Edit Visitor',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => VisitorRegistrationScreen(
+                            visitorToEdit: visitor,
+                            onRegistrationSuccess: _fetchVisitors,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(width: 6),
                   Icon(

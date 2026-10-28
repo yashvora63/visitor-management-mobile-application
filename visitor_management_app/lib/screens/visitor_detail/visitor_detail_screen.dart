@@ -132,14 +132,13 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
           final status = detail?.status ?? initial?.status ?? 'Registered';
 
           final checkIn = _formatDateTime(
-            detail?.checkInTime.toString(),
-            initial?.checkInTime.toString(),
+            detail?.checkInTime?.toIso8601String(),
+            initial?.checkInTime?.toIso8601String(),
             fallback: 'Not Checked In',
           );
           final checkOut = _formatDateTime(
-
-            detail?.checkInTime.toString(),
-            initial?.checkInTime.toString(),
+            detail?.checkOutTime?.toIso8601String(),
+            initial?.checkOutTime?.toIso8601String(),
             fallback: 'Not Checked Out',
           );
            final createdAt = _formatDateTime(
@@ -375,6 +374,22 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
                   ],
                 ),
 
+                const SizedBox(height: 16),
+
+                // Gate Action (Check-In / Check-Out) Card
+                _buildActionCard(
+                  id: id,
+                  name: name,
+                  project: project,
+                  status: status,
+                  isDark: isDark,
+                  primaryGold: primaryGold,
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  textPrimary: textPrimary,
+                  textSecondary: textSecondary,
+                ),
+
                 const SizedBox(height: 24),
               ],
             ),
@@ -425,6 +440,389 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
     return _visitorListStore.visitorDetail?.status ??
         widget.initialVisitor?.status ??
         'Registered';
+  }
+
+  // ================= Check-In / Check-Out Actions =================
+
+  Widget _buildActionCard({
+    required String id,
+    required String name,
+    required String project,
+    required String status,
+    required bool isDark,
+    required Color primaryGold,
+    required Color cardBg,
+    required Color borderColor,
+    required Color textPrimary,
+    required Color textSecondary,
+  }) {
+    final s = status.toLowerCase().trim();
+    final isRegistered =
+        s == 'registered' || s.contains('register') || s == 'status 3';
+    final isCheckedIn =
+        s == 'checked in' || s.contains('check_in') || s == 'status 1';
+    final isCheckedOut =
+        s == 'checked out' || s.contains('check_out') || s == 'status 2';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: borderColor, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.swap_horizontal_circle_outlined,
+                color: primaryGold,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Gate Action',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: textPrimary,
+                  letterSpacing: 0.1,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (isRegistered) ...[
+            Text(
+              'Visitor is currently registered and awaiting entry at the gate.',
+              style: TextStyle(fontSize: 13, color: textSecondary, height: 1.4),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.login_rounded, size: 20),
+                label: const Text(
+                  'Check In Visitor',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.successGreen,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () => _confirmAndCheckIn(id, name, project),
+              ),
+            ),
+          ] else if (isCheckedIn) ...[
+            Text(
+              'Visitor has checked in and is currently on the premises.',
+              style: TextStyle(fontSize: 13, color: textSecondary, height: 1.4),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.logout_rounded, size: 20),
+                label: const Text(
+                  'Check Out Visitor',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.errorRed,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () => _confirmAndCheckOut(id, name, project),
+              ),
+            ),
+          ] else if (isCheckedOut) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.errorRed.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.errorRed.withValues(alpha: 0.25),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle_outline_rounded,
+                      size: 20, color: AppColors.errorRed),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Visit Completed. This visitor has checked out and the visit session has concluded.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmAndCheckIn(
+      String id, String name, String project) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final nowFormatted =
+        DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.now());
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.successGreen.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.login_rounded,
+                  color: AppColors.successGreen, size: 24),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text('Confirm Check-In',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
+                  height: 1.4,
+                ),
+                children: [
+                  const TextSpan(text: 'Are you sure you want to Check In '),
+                  TextSpan(
+                      text: name,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const TextSpan(text: ' into '),
+                  TextSpan(
+                      text: project,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const TextSpan(text: '?'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkInputBg : AppColors.lightInputBg,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.schedule_rounded,
+                      size: 16, color: AppColors.successGreen),
+                  const SizedBox(width: 8),
+                  Text(
+                    nowFormatted,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(Strings.cancel,
+                style: TextStyle(
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.successGreen,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Confirm Check-In',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await _visitorListStore.checkInVisitor(id);
+        AppToast.showSuccess(message: '$name checked in successfully!');
+        _fetchDetail();
+      } catch (e) {
+        AppToast.showError(
+            message: e.toString().replaceFirst('Exception: ', ''));
+      }
+    }
+  }
+
+  Future<void> _confirmAndCheckOut(
+      String id, String name, String project) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final nowFormatted =
+        DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.now());
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.errorRed.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.logout_rounded,
+                  color: AppColors.errorRed, size: 24),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text('Confirm Check-Out',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
+                  height: 1.4,
+                ),
+                children: [
+                  const TextSpan(text: 'Are you sure you want to Check Out '),
+                  TextSpan(
+                      text: name,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const TextSpan(text: '? This will mark the visit as completed.'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkInputBg : AppColors.lightInputBg,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.schedule_rounded,
+                      size: 16, color: AppColors.errorRed),
+                  const SizedBox(width: 8),
+                  Text(
+                    nowFormatted,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(Strings.cancel,
+                style: TextStyle(
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.errorRed,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Confirm Check-Out',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await _visitorListStore.checkOutVisitor(id);
+        AppToast.showSuccess(message: '$name checked out successfully!');
+        _fetchDetail();
+      } catch (e) {
+        AppToast.showError(
+            message: e.toString().replaceFirst('Exception: ', ''));
+      }
+    }
   }
 
   // ================= UI Helpers =================

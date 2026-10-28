@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:mobx/mobx.dart';
+import 'package:visitor_management_app/constants/strings.dart';
 import 'package:visitor_management_app/data/repository.dart';
 import 'package:visitor_management_app/models/visitor_detail/visitor_detail_model.dart';
 import 'package:visitor_management_app/models/visitors_list/visitors_model.dart';
@@ -24,12 +25,18 @@ abstract class _VisitorListStore with Store {
   static ObservableFuture<VisitorDetailModel?> emptyDetailResponse =
       ObservableFuture.value(null);
 
+  static ObservableFuture<VisitorListModel?> emptyUpdateResponse =
+      ObservableFuture.value(null);
+
   @observable
   ObservableFuture<List<VisitorListModel>?> fetchVisitorListFuture = emptyResponse;
 
   @observable
   ObservableFuture<VisitorDetailModel?> fetchVisitorDetailFuture =
       emptyDetailResponse;
+
+  @observable
+  ObservableFuture<VisitorListModel?> updateStatusFuture = emptyUpdateResponse;
 
   @observable
   List<VisitorListModel> visitorList = [];
@@ -60,6 +67,10 @@ abstract class _VisitorListStore with Store {
   @computed
   bool get isDetailLoading =>
       fetchVisitorDetailFuture.status == FutureStatus.pending;
+
+  @computed
+  bool get isStatusUpdating =>
+      updateStatusFuture.status == FutureStatus.pending;
 
   @computed
   bool get hasVisitors => visitorList.isNotEmpty;
@@ -184,6 +195,182 @@ abstract class _VisitorListStore with Store {
       final detail = await future;
       visitorDetail = detail;
       return detail;
+    } catch (err) {
+      if (err is DioException) {
+        errorStore.errorMessage = DioErrorUtil.handleError(err);
+      } else {
+        errorStore.errorMessage = err.toString();
+      }
+      rethrow;
+    }
+  }
+
+  @action
+  Future<VisitorListModel> checkInVisitor(String id) async {
+    // 1. Find visitor in memory or detail to validate status
+    VisitorListModel? target;
+    try {
+      target = _allVisitors.firstWhere((v) => v.id == id);
+    } catch (_) {
+      if (visitorDetail != null && visitorDetail!.id == id) {
+        target = VisitorListModel(
+          id: visitorDetail!.id,
+          name: visitorDetail!.name,
+          mobile: visitorDetail!.mobile,
+          email: visitorDetail!.email,
+          visitorType: visitorDetail!.visitorType,
+          project: visitorDetail!.project,
+          purpose: visitorDetail!.purpose,
+          status: visitorDetail!.status,
+          createdAt: visitorDetail!.createdAt,
+          checkInTime: visitorDetail!.checkInTime,
+          checkOutTime: visitorDetail!.checkOutTime,
+        );
+      }
+    }
+
+    if (target != null) {
+      final s = target.status.toLowerCase().trim();
+      if (s == 'checked in' || s.contains('check_in') || s == 'status 1') {
+        const msg = Strings.duplicateCheckInError;
+        errorStore.errorMessage = msg;
+        throw msg;
+      }
+      if (s == 'checked out' || s.contains('check_out') || s == 'status 2') {
+        const msg = Strings.visitCompletedError;
+        errorStore.errorMessage = msg;
+        throw msg;
+      }
+    }
+
+    final checkInIso = DateTime.now().toIso8601String();
+    final data = {
+      'status': 'Checked In',
+      'check_in_time': checkInIso,
+    };
+
+    final future = _repository.patchVisitor(id, data);
+    updateStatusFuture = ObservableFuture(future);
+
+    try {
+      final updated = await future;
+
+      // Update in _allVisitors
+      final idx = _allVisitors.indexWhere((v) => v.id == id);
+      if (idx != -1) {
+        _allVisitors[idx] = updated;
+      } else {
+        _allVisitors.add(updated);
+      }
+
+      // Update visitorDetail if viewing
+      if (visitorDetail != null && visitorDetail!.id == id) {
+        visitorDetail = VisitorDetailModel(
+          id: updated.id,
+          name: updated.name,
+          mobile: updated.mobile,
+          email: updated.email,
+          visitorType: updated.visitorType,
+          project: updated.project,
+          purpose: updated.purpose,
+          status: updated.status,
+          createdAt: updated.createdAt,
+          checkInTime: updated.checkInTime,
+          checkOutTime: updated.checkOutTime,
+        );
+      }
+
+      _applyFilterAndSearch();
+      successStore.successMessage = 'Visitor checked in successfully';
+      return updated;
+    } catch (err) {
+      if (err is DioException) {
+        errorStore.errorMessage = DioErrorUtil.handleError(err);
+      } else {
+        errorStore.errorMessage = err.toString();
+      }
+      rethrow;
+    }
+  }
+
+  @action
+  Future<VisitorListModel> checkOutVisitor(String id) async {
+    // 1. Find visitor in memory or detail to validate status
+    VisitorListModel? target;
+    try {
+      target = _allVisitors.firstWhere((v) => v.id == id);
+    } catch (_) {
+      if (visitorDetail != null && visitorDetail!.id == id) {
+        target = VisitorListModel(
+          id: visitorDetail!.id,
+          name: visitorDetail!.name,
+          mobile: visitorDetail!.mobile,
+          email: visitorDetail!.email,
+          visitorType: visitorDetail!.visitorType,
+          project: visitorDetail!.project,
+          purpose: visitorDetail!.purpose,
+          status: visitorDetail!.status,
+          createdAt: visitorDetail!.createdAt,
+          checkInTime: visitorDetail!.checkInTime,
+          checkOutTime: visitorDetail!.checkOutTime,
+        );
+      }
+    }
+
+    if (target != null) {
+      final s = target.status.toLowerCase().trim();
+      if (s == 'registered' || s.contains('register') || s == 'status 3') {
+        const msg = 'Visitors cannot check out before checking in.';
+        errorStore.errorMessage = msg;
+        throw msg;
+      }
+      if (s == 'checked out' || s.contains('check_out') || s == 'status 2') {
+        const msg = 'Visitor is already checked out.';
+        errorStore.errorMessage = msg;
+        throw msg;
+      }
+    }
+
+    final checkOutIso = DateTime.now().toIso8601String();
+    final data = {
+      'status': 'Checked Out',
+      'check_out_time': checkOutIso,
+    };
+
+    final future = _repository.patchVisitor(id, data);
+    updateStatusFuture = ObservableFuture(future);
+
+    try {
+      final updated = await future;
+
+      // Update in _allVisitors
+      final idx = _allVisitors.indexWhere((v) => v.id == id);
+      if (idx != -1) {
+        _allVisitors[idx] = updated;
+      } else {
+        _allVisitors.add(updated);
+      }
+
+      // Update visitorDetail if viewing
+      if (visitorDetail != null && visitorDetail!.id == id) {
+        visitorDetail = VisitorDetailModel(
+          id: updated.id,
+          name: updated.name,
+          mobile: updated.mobile,
+          email: updated.email,
+          visitorType: updated.visitorType,
+          project: updated.project,
+          purpose: updated.purpose,
+          status: updated.status,
+          createdAt: updated.createdAt,
+          checkInTime: updated.checkInTime,
+          checkOutTime: updated.checkOutTime,
+        );
+      }
+
+      _applyFilterAndSearch();
+      successStore.successMessage = 'Visitor checked out successfully';
+      return updated;
     } catch (err) {
       if (err is DioException) {
         errorStore.errorMessage = DioErrorUtil.handleError(err);

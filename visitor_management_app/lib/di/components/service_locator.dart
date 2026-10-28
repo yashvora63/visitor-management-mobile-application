@@ -14,6 +14,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/sharedpref/shared_preference_helper.dart';
 import 'package:visitor_management_app/di/module/local_module.dart';
 import 'package:visitor_management_app/data/network/apis/visitors/visitors_api.dart';
+import 'package:visitor_management_app/stores/visitor_registration/visitor_registration_store.dart';
+import 'package:visitor_management_app/data/network/apis/visitors_registration/visitors_registration_api.dart';
 
 final getIt = GetIt.instance;
 
@@ -27,7 +29,6 @@ Future<void> setupLocator() async {
     () => LocalModule.provideSharedPreferences(),
   );
 
-
   // singletons:----------------------------------------------------------------
   getIt.registerSingleton(
     SharedPreferenceHelper(await getIt.getAsync<SharedPreferences>()),
@@ -40,10 +41,15 @@ Future<void> setupLocator() async {
 
   //apis:----------------------------------------------------------
   getIt.registerSingleton(VisitorListApi(getIt<DioClient>()));
+  getIt.registerSingleton(VisitorRegistrationApi(getIt<DioClient>()));
 
   // repository:----------------------------------------------------------------
   getIt.registerSingleton(
-    Repository(getIt<SharedPreferenceHelper>(), getIt<VisitorListApi>()),
+    Repository(
+      getIt<SharedPreferenceHelper>(),
+      getIt<VisitorListApi>(),
+      getIt<VisitorRegistrationApi>(),
+    ),
   );
 
   // stores:--------------------------------------------------------------------
@@ -51,4 +57,5 @@ Future<void> setupLocator() async {
   getIt.registerSingleton(ThemeStore(getIt<Repository>()));
   getIt.registerSingleton(NavigationStore(getIt<Repository>()));
   getIt.registerSingleton(VisitorListStore(getIt<Repository>()));
+  getIt.registerSingleton(VisitorRegistrationStore(getIt<Repository>()));
 }

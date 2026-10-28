@@ -23,6 +23,13 @@ mixin _$VisitorListStore on _VisitorListStore, Store {
     () => super.isDetailLoading,
     name: '_VisitorListStore.isDetailLoading',
   )).value;
+  Computed<bool>? _$isStatusUpdatingComputed;
+
+  @override
+  bool get isStatusUpdating => (_$isStatusUpdatingComputed ??= Computed<bool>(
+    () => super.isStatusUpdating,
+    name: '_VisitorListStore.isStatusUpdating',
+  )).value;
   Computed<bool>? _$hasVisitorsComputed;
 
   @override
@@ -101,6 +108,24 @@ mixin _$VisitorListStore on _VisitorListStore, Store {
         super.fetchVisitorDetailFuture = value;
       },
     );
+  }
+
+  late final _$updateStatusFutureAtom = Atom(
+    name: '_VisitorListStore.updateStatusFuture',
+    context: context,
+  );
+
+  @override
+  ObservableFuture<VisitorListModel?> get updateStatusFuture {
+    _$updateStatusFutureAtom.reportRead();
+    return super.updateStatusFuture;
+  }
+
+  @override
+  set updateStatusFuture(ObservableFuture<VisitorListModel?> value) {
+    _$updateStatusFutureAtom.reportWrite(value, super.updateStatusFuture, () {
+      super.updateStatusFuture = value;
+    });
   }
 
   late final _$visitorListAtom = Atom(
@@ -253,6 +278,26 @@ mixin _$VisitorListStore on _VisitorListStore, Store {
     return _$getVisitorDetailAsyncAction.run(() => super.getVisitorDetail(id));
   }
 
+  late final _$checkInVisitorAsyncAction = AsyncAction(
+    '_VisitorListStore.checkInVisitor',
+    context: context,
+  );
+
+  @override
+  Future<VisitorListModel> checkInVisitor(String id) {
+    return _$checkInVisitorAsyncAction.run(() => super.checkInVisitor(id));
+  }
+
+  late final _$checkOutVisitorAsyncAction = AsyncAction(
+    '_VisitorListStore.checkOutVisitor',
+    context: context,
+  );
+
+  @override
+  Future<VisitorListModel> checkOutVisitor(String id) {
+    return _$checkOutVisitorAsyncAction.run(() => super.checkOutVisitor(id));
+  }
+
   late final _$_VisitorListStoreActionController = ActionController(
     name: '_VisitorListStore',
     context: context,
@@ -323,6 +368,7 @@ mixin _$VisitorListStore on _VisitorListStore, Store {
     return '''
 fetchVisitorListFuture: ${fetchVisitorListFuture},
 fetchVisitorDetailFuture: ${fetchVisitorDetailFuture},
+updateStatusFuture: ${updateStatusFuture},
 visitorList: ${visitorList},
 searchVisitorList: ${searchVisitorList},
 visitorDetail: ${visitorDetail},
@@ -331,6 +377,7 @@ selectedStatusFilter: ${selectedStatusFilter},
 selectedTypeFilter: ${selectedTypeFilter},
 loading: ${loading},
 isDetailLoading: ${isDetailLoading},
+isStatusUpdating: ${isStatusUpdating},
 hasVisitors: ${hasVisitors},
 totalVisitors: ${totalVisitors},
 allVisitorsCount: ${allVisitorsCount},
