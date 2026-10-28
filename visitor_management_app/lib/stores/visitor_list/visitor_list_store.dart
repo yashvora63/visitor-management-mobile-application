@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:mobx/mobx.dart';
-import 'package:visitor_management_app/constants/strings.dart';
 import 'package:visitor_management_app/data/repository.dart';
-import 'package:visitor_management_app/models/visitor_detail/visitor_detail_model.dart';
-import 'package:visitor_management_app/models/visitors_list/visitors_model.dart';
+import 'package:visitor_management_app/constants/strings.dart';
+import 'package:visitor_management_app/utils/dio/dio_error_util.dart';
 import 'package:visitor_management_app/stores/error/error_store.dart';
 import 'package:visitor_management_app/stores/success/success_store.dart';
-import 'package:visitor_management_app/utils/dio/dio_error_util.dart';
+import 'package:visitor_management_app/models/visitors_list/visitors_model.dart';
+import 'package:visitor_management_app/models/visitor_detail/visitor_detail_model.dart';
 
 part 'visitor_list_store.g.dart';
 
@@ -29,7 +29,8 @@ abstract class _VisitorListStore with Store {
       ObservableFuture.value(null);
 
   @observable
-  ObservableFuture<List<VisitorListModel>?> fetchVisitorListFuture = emptyResponse;
+  ObservableFuture<List<VisitorListModel>?> fetchVisitorListFuture =
+      emptyResponse;
 
   @observable
   ObservableFuture<VisitorDetailModel?> fetchVisitorDetailFuture =
@@ -82,24 +83,20 @@ abstract class _VisitorListStore with Store {
   int get allVisitorsCount => _allVisitors.length;
 
   @computed
-  int get checkedInVisitors => _allVisitors
-      .where((v) {
-        final status = v.status.toLowerCase();
-        return status == 'checked in' ||
-            status.contains('check_in') ||
-            status == 'status 1';
-      })
-      .length;
+  int get checkedInVisitors => _allVisitors.where((v) {
+    final status = v.status.toLowerCase();
+    return status == 'checked in' ||
+        status.contains('check_in') ||
+        status == 'status 1';
+  }).length;
 
   @computed
-  int get checkedOutVisitors => _allVisitors
-      .where((v) {
-        final status = v.status.toLowerCase();
-        return status == 'checked out' ||
-            status.contains('check_out') ||
-            status == 'status 2';
-      })
-      .length;
+  int get checkedOutVisitors => _allVisitors.where((v) {
+    final status = v.status.toLowerCase();
+    return status == 'checked out' ||
+        status.contains('check_out') ||
+        status == 'status 2';
+  }).length;
 
   // ================= Dashboard Calculative Metrics =================
 
@@ -121,8 +118,7 @@ abstract class _VisitorListStore with Store {
         .where((v) => _isSameDayAsToday(v.createdAt?.toIso8601String()))
         .length;
     if (parsedCount > 0) return parsedCount;
-    final hasAnyValidDate =
-        _allVisitors.any((v) => v.createdAt != null);
+    final hasAnyValidDate = _allVisitors.any((v) => v.createdAt != null);
     if (!hasAnyValidDate && _allVisitors.isNotEmpty) {
       return _allVisitors.length;
     }
@@ -143,9 +139,7 @@ abstract class _VisitorListStore with Store {
         .where((v) => _isSameDayAsToday(v.checkOutTime?.toIso8601String()))
         .length;
     if (parsedCount > 0) return parsedCount;
-    final hasAnyValidDate = checkedOutList.any(
-      (v) => v.checkOutTime != null,
-    );
+    final hasAnyValidDate = checkedOutList.any((v) => v.checkOutTime != null);
     if (!hasAnyValidDate && checkedOutList.isNotEmpty) {
       return checkedOutList.length;
     }
@@ -153,17 +147,31 @@ abstract class _VisitorListStore with Store {
   }
 
   int get registeredVisitorsCount => _allVisitors.where((v) {
-        final status = v.status.toLowerCase();
-        return status == 'registered' ||
-            status.contains('register') ||
-            status == 'status 3';
-      }).length;
+    final status = v.status.toLowerCase();
+    return status == 'registered' ||
+        status.contains('register') ||
+        status == 'status 3';
+  }).length;
 
   List<VisitorListModel> get allVisitors => _allVisitors;
 
   List<VisitorListModel> get recentVisitors {
     if (_allVisitors.isEmpty) return [];
-    return _allVisitors.reversed.take(5).toList();
+    return _allVisitors.take(5).toList();
+  }
+
+  int _compareVisitorsByCreatedAtDesc(VisitorListModel a, VisitorListModel b) {
+    if (a.createdAt != null && b.createdAt != null) {
+      return b.createdAt!.compareTo(a.createdAt!);
+    }
+    if (a.createdAt != null) return -1;
+    if (b.createdAt != null) return 1;
+    final idA = int.tryParse(a.id);
+    final idB = int.tryParse(b.id);
+    if (idA != null && idB != null) {
+      return idB.compareTo(idA);
+    }
+    return b.id.compareTo(a.id);
   }
 
   // ================= Actions =================
@@ -175,6 +183,7 @@ abstract class _VisitorListStore with Store {
 
     try {
       final list = await future;
+      list.sort(_compareVisitorsByCreatedAtDesc);
       _allVisitors = list;
       _applyFilterAndSearch();
       return list;
@@ -190,6 +199,7 @@ abstract class _VisitorListStore with Store {
 
   @action
   Future<VisitorDetailModel?> getVisitorDetail(String id) async {
+    visitorDetail = null;
     final future = _repository.getVisitordetail(id);
     fetchVisitorDetailFuture = ObservableFuture(future);
 
@@ -246,10 +256,7 @@ abstract class _VisitorListStore with Store {
     }
 
     final checkInIso = DateTime.now().toIso8601String();
-    final data = {
-      'status': 'Checked In',
-      'check_in_time': checkInIso,
-    };
+    final data = {'status': 'Checked In', 'check_in_time': checkInIso};
 
     final future = _repository.patchVisitor(id, data);
     updateStatusFuture = ObservableFuture(future);
@@ -265,6 +272,7 @@ abstract class _VisitorListStore with Store {
       } else {
         nextVisitors.add(updated);
       }
+      nextVisitors.sort(_compareVisitorsByCreatedAtDesc);
       _allVisitors = nextVisitors;
 
       // Update visitorDetail if viewing
@@ -336,10 +344,7 @@ abstract class _VisitorListStore with Store {
     }
 
     final checkOutIso = DateTime.now().toIso8601String();
-    final data = {
-      'status': 'Checked Out',
-      'check_out_time': checkOutIso,
-    };
+    final data = {'status': 'Checked Out', 'check_out_time': checkOutIso};
 
     final future = _repository.patchVisitor(id, data);
     updateStatusFuture = ObservableFuture(future);
@@ -355,6 +360,7 @@ abstract class _VisitorListStore with Store {
       } else {
         nextVisitors.add(updated);
       }
+      nextVisitors.sort(_compareVisitorsByCreatedAtDesc);
       _allVisitors = nextVisitors;
 
       // Update visitorDetail if viewing
@@ -416,7 +422,9 @@ abstract class _VisitorListStore with Store {
 
   @action
   void setVisitors(List<VisitorListModel> list) {
-    _allVisitors = list;
+    final sorted = List<VisitorListModel>.from(list);
+    sorted.sort(_compareVisitorsByCreatedAtDesc);
+    _allVisitors = sorted;
     _applyFilterAndSearch();
   }
 
@@ -429,6 +437,7 @@ abstract class _VisitorListStore with Store {
     } else {
       nextVisitors.add(visitor);
     }
+    nextVisitors.sort(_compareVisitorsByCreatedAtDesc);
     _allVisitors = nextVisitors;
     _applyFilterAndSearch();
   }
@@ -441,8 +450,7 @@ abstract class _VisitorListStore with Store {
         selectedStatusFilter.toLowerCase() != 'all') {
       result = result
           .where(
-            (v) =>
-                v.status.toLowerCase() == selectedStatusFilter.toLowerCase(),
+            (v) => v.status.toLowerCase() == selectedStatusFilter.toLowerCase(),
           )
           .toList();
     }

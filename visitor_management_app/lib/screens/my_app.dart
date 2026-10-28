@@ -1,6 +1,5 @@
 import 'package:sizer/sizer.dart';
 import '../constants/strings.dart';
-import '../utils/routes/routes.dart';
 import '../constants/app_theme.dart';
 import 'package:flutter/material.dart';
 import '../stores/theme/theme_store.dart';
@@ -42,7 +41,6 @@ class _MyAppState extends State<MyApp> {
               theme: _themeStore.darkMode
                   ? AppTheme.darkThemeData
                   : AppTheme.lightThemeData,
-              routes: Routes.routes,
               locale: Locale(_languageStore.locale),
               supportedLocales: _languageStore.supportedLanguages
                   .map((language) => Locale(language.locale!, language.code))

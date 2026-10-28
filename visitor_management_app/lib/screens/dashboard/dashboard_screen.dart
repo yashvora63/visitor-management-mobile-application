@@ -1,27 +1,22 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
-
 import '../../constants/colors.dart';
 import '../../constants/strings.dart';
+import 'package:flutter/material.dart';
+import '../qr_scanner/qr_scanner_screen.dart';
+import '../../widgets/dashboard_stat_card.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import '../../di/components/service_locator.dart';
+import '../visitor_list/visitor_list_screen.dart';
+import '../visitor_detail/visitor_detail_screen.dart';
 import '../../models/visitors_list/visitors_model.dart';
 import '../../stores/visitor_list/visitor_list_store.dart';
-import '../../widgets/dashboard_stat_card.dart';
-import '../visitor_detail/visitor_detail_screen.dart';
-import '../visitor_list/visitor_list_screen.dart';
 import '../visitor_registration/visitor_registration_screen.dart';
-import '../qr_scanner/qr_scanner_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final bool isActive;
   final void Function(int index)? onNavigateTab;
 
-  const DashboardScreen({
-    super.key,
-    this.isActive = true,
-    this.onNavigateTab,
-  });
+  const DashboardScreen({super.key, this.isActive = true, this.onNavigateTab});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -88,8 +83,9 @@ class _DashboardScreenState extends State<DashboardScreen>
         default:
           return;
       }
-      await Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => target));
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => target));
       if (mounted) {
         _fetchVisitors();
       }
@@ -128,8 +124,9 @@ class _DashboardScreenState extends State<DashboardScreen>
         ? AppColors.darkTextSecondary
         : AppColors.lightTextSecondary;
 
-    final formattedDate = DateFormat('EEEE, d MMMM yyyy')
-        .format(DateTime.now());
+    final formattedDate = DateFormat(
+      'EEEE, d MMMM yyyy',
+    ).format(DateTime.now());
 
     return Scaffold(
       backgroundColor: scaffoldBg,

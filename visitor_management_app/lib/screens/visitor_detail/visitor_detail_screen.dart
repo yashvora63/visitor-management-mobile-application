@@ -1,14 +1,19 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter/rendering.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:visitor_management_app/constants/colors.dart';
 import 'package:visitor_management_app/constants/strings.dart';
+import 'package:visitor_management_app/widgets/app_toast.dart';
 import 'package:visitor_management_app/di/components/service_locator.dart';
-import 'package:intl/intl.dart';
 import 'package:visitor_management_app/models/visitors_list/visitors_model.dart';
 import 'package:visitor_management_app/stores/visitor_list/visitor_list_store.dart';
-import 'package:visitor_management_app/widgets/app_toast.dart';
 
 class VisitorDetailScreen extends StatefulWidget {
   final String visitorId;
@@ -26,6 +31,8 @@ class VisitorDetailScreen extends StatefulWidget {
 
 class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
   final VisitorListStore _visitorListStore = getIt<VisitorListStore>();
+  final GlobalKey _qrPassKey = GlobalKey();
+  bool _isSharing = false;
 
   @override
   void initState() {
@@ -41,24 +48,136 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
     }
   }
 
+  Future<void> _shareQrPassImage({
+    required String id,
+    required String name,
+    required String project,
+    required String status,
+  }) async {
+    if (_isSharing) return;
+
+    // Get origin box for iPad / tablet popovers before async gap
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box != null
+        ? box.localToGlobal(Offset.zero) & box.size
+        : null;
+
+    setState(() => _isSharing = true);
+
+    try {
+      Uint8List? pngBytes;
+
+      // 1. Try capturing high-resolution image of the pass card via RepaintBoundary
+      try {
+        final boundary =
+            _qrPassKey.currentContext?.findRenderObject()
+                as RenderRepaintBoundary?;
+        if (boundary != null) {
+          final image = await boundary.toImage(pixelRatio: 3.0);
+          final byteData = await image.toByteData(
+            format: ui.ImageByteFormat.png,
+          );
+          if (byteData != null) {
+            pngBytes = byteData.buffer.asUint8List();
+          }
+        }
+      } catch (e) {
+        debugPrint('RepaintBoundary capture error: $e');
+      }
+
+      // 2. Fallback to generating QR code directly via QrPainter if boundary not available
+      if (pngBytes == null) {
+        final qrData = 'SUMADHURA-PASS:$id|$name|$project|$status';
+        final painter = QrPainter(
+          data: qrData,
+          version: QrVersions.auto,
+          gapless: true,
+          eyeStyle: const QrEyeStyle(
+            eyeShape: QrEyeShape.square,
+            color: Color(0xFF1C1A17),
+          ),
+          dataModuleStyle: const QrDataModuleStyle(
+            dataModuleShape: QrDataModuleShape.square,
+            color: Color(0xFF1C1A17),
+          ),
+        );
+        final byteData = await painter.toImageData(
+          800,
+          format: ui.ImageByteFormat.png,
+        );
+        if (byteData != null) {
+          pngBytes = byteData.buffer.asUint8List();
+        }
+      }
+
+      if (pngBytes == null) {
+        throw Exception('Failed to generate gate pass QR image');
+      }
+
+      // Save to temporary directory
+      final tempDir = await getTemporaryDirectory();
+      final sanitizedId = id.replaceAll(RegExp(r'[^\w\-]'), '_');
+      final file = File('${tempDir.path}/gate_pass_$sanitizedId.png');
+      await file.writeAsBytes(pngBytes);
+
+      final shareText =
+          'Sumadhura Digital Gate Pass\nVisitor: $name (ID: #$id)\nProject: $project\nStatus: $status\nScan pass at security checkpoint or front-desk terminal.';
+
+      final result = await SharePlus.instance.share(
+        ShareParams(
+          files: [
+            XFile(
+              file.path,
+              mimeType: 'image/png',
+              name: 'gate_pass_$sanitizedId.png',
+            ),
+          ],
+          text: shareText,
+          subject: 'Sumadhura Digital Gate Pass - $name',
+          title: 'Sumadhura Digital Gate Pass',
+          sharePositionOrigin: origin,
+        ),
+      );
+
+      if (result.status == ShareResultStatus.success) {
+        AppToast.showSuccess(message: 'Digital gate pass shared successfully!');
+      }
+    } catch (e) {
+      debugPrint('Share QR pass error: $e');
+      AppToast.showError(
+        message:
+            'Could not share QR pass: ${e.toString().replaceFirst("Exception: ", "")}',
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSharing = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryGold = isDark ? AppColors.goldLight : AppColors.primaryGold;
     final cardBg = isDark ? AppColors.darkCardBg : AppColors.lightCardBg;
-    final borderColor =
-        isDark ? AppColors.darkCardBorder : AppColors.lightBorder;
-    final textPrimary =
-        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
-    final textSecondary =
-        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final borderColor = isDark
+        ? AppColors.darkCardBorder
+        : AppColors.lightBorder;
+    final textPrimary = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.darkScaffoldBg : AppColors.lightScaffoldBg,
+      backgroundColor: isDark
+          ? AppColors.darkScaffoldBg
+          : AppColors.lightScaffoldBg,
       appBar: AppBar(
-        backgroundColor:
-            isDark ? AppColors.darkScaffoldBg : AppColors.lightScaffoldBg,
+        backgroundColor: isDark
+            ? AppColors.darkScaffoldBg
+            : AppColors.lightScaffoldBg,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -86,19 +205,22 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
             onPressed: _fetchDetail,
           ),
           IconButton(
-            icon: Icon(Icons.share_outlined, color: primaryGold, size: 21),
+            icon: _isSharing
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Icon(Icons.share_outlined, color: primaryGold, size: 21),
             tooltip: 'Share Pass',
-            onPressed: () {
-              Clipboard.setData(
-                ClipboardData(
-                  text:
-                      'Visitor Pass #${widget.visitorId}\nName: ${_getName()}\nProject: ${_getProject()}\nStatus: ${_getStatus()}',
-                ),
-              );
-              AppToast.showSuccess(
-                message: 'Visitor pass details copied to clipboard!',
-              );
-            },
+            onPressed: _isSharing
+                ? null
+                : () => _shareQrPassImage(
+                    id: widget.visitorId,
+                    name: _getName(),
+                    project: _getProject(),
+                    status: _getStatus(),
+                  ),
           ),
           const SizedBox(width: 8),
         ],
@@ -116,14 +238,19 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
 
           // If fetch failed and no initial data
           if (detail == null && initial == null) {
-            return _buildErrorState(isDark, primaryGold, textPrimary, textSecondary);
+            return _buildErrorState(
+              isDark,
+              primaryGold,
+              textPrimary,
+              textSecondary,
+            );
           }
 
           final name = detail?.name.isNotEmpty == true
               ? detail!.name
               : (initial?.name.isNotEmpty == true ? initial!.name : 'Visitor');
 
-            final mobile =  detail?.mobile.toString() ??  '-';
+          final mobile = detail?.mobile.toString() ?? '-';
           final email = detail?.email ?? initial?.email ?? '-';
           final visitorType =
               detail?.visitorType ?? initial?.visitorType ?? 'Visitor';
@@ -141,12 +268,12 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
             initial?.checkOutTime?.toIso8601String(),
             fallback: 'Not Checked Out',
           );
-           final createdAt = _formatDateTime(
+          final createdAt = _formatDateTime(
             detail?.createdAt.toString(),
             initial?.createdAt.toString(),
             fallback: 'Recently',
           );
-           final id = detail?.id ?? initial?.id ?? widget.visitorId;
+          final id = detail?.id ?? initial?.id ?? widget.visitorId;
 
           return RefreshIndicator(
             color: primaryGold,
@@ -162,8 +289,10 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
                 if (isDetailLoading && initial != null)
                   Container(
                     margin: const EdgeInsets.only(bottom: 12),
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 6,
+                      horizontal: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: primaryGold.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
@@ -320,7 +449,9 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
                         tooltip: 'Copy Email',
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: email));
-                          AppToast.showSuccess(message: 'Email address copied!');
+                          AppToast.showSuccess(
+                            message: 'Email address copied!',
+                          );
                         },
                       ),
                     ),
@@ -422,7 +553,6 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
     }
     return val;
   }
-
 
   String _getName() {
     return _visitorListStore.visitorDetail?.name ??
@@ -565,8 +695,11 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle_outline_rounded,
-                      size: 20, color: AppColors.errorRed),
+                  const Icon(
+                    Icons.check_circle_outline_rounded,
+                    size: 20,
+                    color: AppColors.errorRed,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -588,10 +721,14 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
   }
 
   Future<void> _confirmAndCheckIn(
-      String id, String name, String project) async {
+    String id,
+    String name,
+    String project,
+  ) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final nowFormatted =
-        DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.now());
+    final nowFormatted = DateFormat(
+      'dd MMM yyyy, hh:mm a',
+    ).format(DateTime.now());
 
     final confirm = await showDialog<bool>(
       context: context,
@@ -606,13 +743,18 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
                 color: AppColors.successGreen.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.login_rounded,
-                  color: AppColors.successGreen, size: 24),
+              child: const Icon(
+                Icons.login_rounded,
+                color: AppColors.successGreen,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 12),
             const Expanded(
-              child: Text('Confirm Check-In',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              child: Text(
+                'Confirm Check-In',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
             ),
           ],
         ),
@@ -632,12 +774,14 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
                 children: [
                   const TextSpan(text: 'Are you sure you want to Check In '),
                   TextSpan(
-                      text: name,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                    text: name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const TextSpan(text: ' into '),
                   TextSpan(
-                      text: project,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                    text: project,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const TextSpan(text: '?'),
                 ],
               ),
@@ -650,12 +794,16 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
                 color: isDark ? AppColors.darkInputBg : AppColors.lightInputBg,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.schedule_rounded,
-                      size: 16, color: AppColors.successGreen),
+                  const Icon(
+                    Icons.schedule_rounded,
+                    size: 16,
+                    color: AppColors.successGreen,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     nowFormatted,
@@ -675,22 +823,28 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(Strings.cancel,
-                style: TextStyle(
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary)),
+            child: Text(
+              Strings.cancel,
+              style: TextStyle(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
+              ),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.successGreen,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Confirm Check-In',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Confirm Check-In',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -703,16 +857,21 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
         _fetchDetail();
       } catch (e) {
         AppToast.showError(
-            message: e.toString().replaceFirst('Exception: ', ''));
+          message: e.toString().replaceFirst('Exception: ', ''),
+        );
       }
     }
   }
 
   Future<void> _confirmAndCheckOut(
-      String id, String name, String project) async {
+    String id,
+    String name,
+    String project,
+  ) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final nowFormatted =
-        DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.now());
+    final nowFormatted = DateFormat(
+      'dd MMM yyyy, hh:mm a',
+    ).format(DateTime.now());
 
     final confirm = await showDialog<bool>(
       context: context,
@@ -727,13 +886,18 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
                 color: AppColors.errorRed.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.logout_rounded,
-                  color: AppColors.errorRed, size: 24),
+              child: const Icon(
+                Icons.logout_rounded,
+                color: AppColors.errorRed,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 12),
             const Expanded(
-              child: Text('Confirm Check-Out',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              child: Text(
+                'Confirm Check-Out',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
             ),
           ],
         ),
@@ -753,9 +917,12 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
                 children: [
                   const TextSpan(text: 'Are you sure you want to Check Out '),
                   TextSpan(
-                      text: name,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const TextSpan(text: '? This will mark the visit as completed.'),
+                    text: name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const TextSpan(
+                    text: '? This will mark the visit as completed.',
+                  ),
                 ],
               ),
             ),
@@ -767,12 +934,16 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
                 color: isDark ? AppColors.darkInputBg : AppColors.lightInputBg,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.schedule_rounded,
-                      size: 16, color: AppColors.errorRed),
+                  const Icon(
+                    Icons.schedule_rounded,
+                    size: 16,
+                    color: AppColors.errorRed,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     nowFormatted,
@@ -792,22 +963,28 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(Strings.cancel,
-                style: TextStyle(
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary)),
+            child: Text(
+              Strings.cancel,
+              style: TextStyle(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
+              ),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.errorRed,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Confirm Check-Out',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Confirm Check-Out',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -820,7 +997,8 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
         _fetchDetail();
       } catch (e) {
         AppToast.showError(
-            message: e.toString().replaceFirst('Exception: ', ''));
+          message: e.toString().replaceFirst('Exception: ', ''),
+        );
       }
     }
   }
@@ -842,12 +1020,12 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
     final statusColor = _getStatusColor(status);
     final initials = name.trim().isNotEmpty
         ? name
-            .trim()
-            .split(' ')
-            .map((e) => e.isNotEmpty ? e[0] : '')
-            .take(2)
-            .join()
-            .toUpperCase()
+              .trim()
+              .split(' ')
+              .map((e) => e.isNotEmpty ? e[0] : '')
+              .take(2)
+              .join()
+              .toUpperCase()
         : 'V';
 
     return Container(
@@ -993,8 +1171,10 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(30),
@@ -1073,82 +1253,185 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
       child: Column(
         children: [
-          Row(
-            children: [
-              Icon(Icons.qr_code_2_rounded, color: primaryGold, size: 22),
-              const SizedBox(width: 10),
-              Text(
-                'Digital Gate Pass',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: textPrimary,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: primaryGold.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  'ENCRYPTED',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: primaryGold,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          // QR container with golden inner card
-          Center(
+          // RepaintBoundary captures only the clean gate pass ticket without the action button
+          RepaintBoundary(
+            key: _qrPassKey,
             child: Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1E1B18) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: primaryGold.withValues(alpha: 0.4),
-                  width: 1.5,
+                  color: primaryGold.withValues(alpha: 0.35),
+                  width: 1.2,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryGold.withValues(alpha: 0.15),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.qr_code_2_rounded,
+                        color: primaryGold,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Digital Gate Pass',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
+                              ),
+                            ),
+                            Text(
+                              '$name • $project',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.lightTextSecondary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: primaryGold.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'ENCRYPTED',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: primaryGold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // QR container with golden inner card
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: primaryGold.withValues(alpha: 0.4),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryGold.withValues(alpha: 0.15),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: QrImageView(
+                        data: qrData,
+                        version: QrVersions.auto,
+                        size: 160.0,
+                        backgroundColor: Colors.white,
+                        eyeStyle: const QrEyeStyle(
+                          eyeShape: QrEyeShape.square,
+                          color: Color(0xFF1C1A17),
+                        ),
+                        dataModuleStyle: const QrDataModuleStyle(
+                          dataModuleShape: QrDataModuleShape.square,
+                          color: Color(0xFF1C1A17),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Scan pass at security checkpoint or front-desk terminal',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Pass ID: #$id',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: primaryGold,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ],
               ),
-              child: QrImageView(
-                data: qrData,
-                version: QrVersions.auto,
-                size: 160.0,
-                backgroundColor: Colors.white,
-                eyeStyle: const QrEyeStyle(
-                  eyeShape: QrEyeShape.square,
-                  color: Color(0xFF1C1A17),
-                ),
-                dataModuleStyle: const QrDataModuleStyle(
-                  dataModuleShape: QrDataModuleShape.square,
-                  color: Color(0xFF1C1A17),
-                ),
-              ),
             ),
           ),
-          const SizedBox(height: 14),
-          Text(
-            'Scan pass at security checkpoint or front-desk terminal',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: textSecondary,
+          const SizedBox(height: 16),
+          // Share Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryGold,
+                foregroundColor: isDark
+                    ? AppColors.darkScaffoldBg
+                    : Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                elevation: 0,
+              ),
+              onPressed: _isSharing
+                  ? null
+                  : () => _shareQrPassImage(
+                      id: id,
+                      name: name,
+                      project: project,
+                      status: status,
+                    ),
+              icon: _isSharing
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          isDark ? AppColors.darkScaffoldBg : Colors.white,
+                        ),
+                      ),
+                    )
+                  : const Icon(Icons.share_rounded, size: 18),
+              label: Text(
+                _isSharing ? 'Preparing QR Pass...' : 'Share Digital Gate Pass',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                ),
+              ),
             ),
           ),
         ],
@@ -1413,10 +1696,7 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
             Text(
               'Please check your network connection and try again.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: textSecondary,
-              ),
+              style: TextStyle(fontSize: 13, color: textSecondary),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
@@ -1426,8 +1706,10 @@ class _VisitorDetailScreenState extends State<VisitorDetailScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryGold,
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import '../di/components/service_locator.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import '../stores/navigation/navigation_store.dart';
 import 'package:visitor_management_app/screens/preview/preview.dart';
 import 'package:visitor_management_app/screens/bottom_navigation/bottom_navigation.dart';

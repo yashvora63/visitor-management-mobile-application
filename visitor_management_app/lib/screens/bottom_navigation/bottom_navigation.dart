@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../constants/colors.dart';
 import '../../constants/strings.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../dashboard/dashboard_screen.dart';
+import '../qr_scanner/qr_scanner_screen.dart';
+import '../visitor_list/visitor_list_screen.dart';
 import '../../di/components/service_locator.dart';
 import '../../stores/visitor_list/visitor_list_store.dart';
-import '../dashboard/dashboard_screen.dart';
-import '../visitor_list/visitor_list_screen.dart';
 import '../visitor_registration/visitor_registration_screen.dart';
-import '../qr_scanner/qr_scanner_screen.dart';
 
 class BottomNavigation extends StatefulWidget {
   final int initialIndex;

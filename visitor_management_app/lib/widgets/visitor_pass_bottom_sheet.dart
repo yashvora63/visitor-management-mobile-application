@@ -1,7 +1,6 @@
+import '../constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-
-import '../constants/colors.dart';
 import '../models/visitors_list/visitors_model.dart';
 import '../screens/visitor_detail/visitor_detail_screen.dart';
 

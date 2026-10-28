@@ -1,18 +1,17 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:permission_handler/permission_handler.dart';
-
 import '../../constants/colors.dart';
 import '../../constants/strings.dart';
+import '../../widgets/app_toast.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../di/components/service_locator.dart';
-import '../../models/visitor_detail/visitor_detail_model.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import '../visitor_detail/visitor_detail_screen.dart';
 import '../../models/visitors_list/visitors_model.dart';
 import '../../stores/visitor_list/visitor_list_store.dart';
-import '../../widgets/app_toast.dart';
-import '../visitor_detail/visitor_detail_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../../models/visitor_detail/visitor_detail_model.dart';
 import '../visitor_registration/visitor_registration_screen.dart';
 
 class QrScannerScreen extends StatefulWidget {
@@ -204,8 +203,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
     // 5. Pass prefix format (e.g. "PASS #VIS001", "#VIS001")
     if (trimmed.toUpperCase().startsWith('PASS #') ||
         trimmed.toUpperCase().startsWith('PASS#')) {
-      final idOnly =
-          trimmed.replaceAll(RegExp(r'pass\s*#?', caseSensitive: false), '').trim();
+      final idOnly = trimmed
+          .replaceAll(RegExp(r'pass\s*#?', caseSensitive: false), '')
+          .trim();
       if (idOnly.isNotEmpty) return idOnly;
     }
     if (trimmed.startsWith('#')) {
@@ -298,9 +298,12 @@ class _QrScannerScreenState extends State<QrScannerScreen>
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         return Dialog(
-          backgroundColor:
-              isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: isDark
+              ? AppColors.darkCardBg
+              : AppColors.lightCardBg,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
             child: Row(
@@ -346,8 +349,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
       context: context,
       barrierDismissible: true,
       builder: (ctx) => AlertDialog(
-        backgroundColor:
-            isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
+        backgroundColor: isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
@@ -390,9 +392,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark
-                    ? AppColors.darkInputBg
-                    : AppColors.lightInputBg,
+                color: isDark ? AppColors.darkInputBg : AppColors.lightInputBg,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
@@ -419,14 +419,15 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
             onPressed: () {
               Navigator.of(ctx).pop();
             },
-            child: const Text('Scan Again',
-                style: TextStyle(fontWeight: FontWeight.w700)),
+            child: const Text(
+              'Scan Again',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),
@@ -446,8 +447,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
       context: context,
       barrierDismissible: true,
       builder: (ctx) => AlertDialog(
-        backgroundColor:
-            isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
+        backgroundColor: isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
@@ -505,10 +505,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
             },
             child: Text(
               'Register Visitor',
-              style: TextStyle(
-                color: primaryGold,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TextStyle(color: primaryGold, fontWeight: FontWeight.w700),
             ),
           ),
           ElevatedButton(
@@ -518,14 +515,15 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
             onPressed: () {
               Navigator.of(ctx).pop('scan_again');
             },
-            child: const Text('Scan Again',
-                style: TextStyle(fontWeight: FontWeight.w700)),
+            child: const Text(
+              'Scan Again',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),
@@ -550,19 +548,24 @@ class _QrScannerScreenState extends State<QrScannerScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryGold = isDark ? AppColors.goldLight : AppColors.primaryGold;
     final sheetBg = isDark ? AppColors.darkCardBg : AppColors.lightCardBg;
-    final textPrimary =
-        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
-    final textSecondary =
-        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final textPrimary = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
 
     final statusLower = visitor.status.toLowerCase().trim();
-    final isRegistered = statusLower == 'registered' ||
+    final isRegistered =
+        statusLower == 'registered' ||
         statusLower.contains('register') ||
         statusLower == 'status 3';
-    final isCheckedIn = statusLower == 'checked in' ||
+    final isCheckedIn =
+        statusLower == 'checked in' ||
         statusLower.contains('check_in') ||
         statusLower == 'status 1';
-    final isCheckedOut = statusLower == 'checked out' ||
+    final isCheckedOut =
+        statusLower == 'checked out' ||
         statusLower.contains('check_out') ||
         statusLower == 'status 2';
 
@@ -619,7 +622,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: primaryGold.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
@@ -630,8 +635,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.verified_rounded,
-                                size: 14, color: primaryGold),
+                            Icon(
+                              Icons.verified_rounded,
+                              size: 14,
+                              color: primaryGold,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               'PASS #${visitor.id}',
@@ -692,7 +700,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                       // Status Badge
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: statusColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(20),
@@ -758,9 +768,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                   _buildDetailItem(
                     icon: Icons.phone_rounded,
                     label: Strings.mobileNumber,
-                    value: visitor.mobile.isNotEmpty
-                        ? visitor.mobile
-                        : '-',
+                    value: visitor.mobile.isNotEmpty ? visitor.mobile : '-',
                     isDark: isDark,
                     textPrimary: textPrimary,
                     textSecondary: textSecondary,
@@ -771,8 +779,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                     _buildDetailItem(
                       icon: Icons.login_rounded,
                       label: Strings.checkInTime,
-                      value: DateFormat('dd MMM yyyy, hh:mm a')
-                          .format(visitor.checkInTime!.toLocal()),
+                      value: DateFormat(
+                        'dd MMM yyyy, hh:mm a',
+                      ).format(visitor.checkInTime!.toLocal()),
                       isDark: isDark,
                       textPrimary: textPrimary,
                       textSecondary: textSecondary,
@@ -784,8 +793,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                     _buildDetailItem(
                       icon: Icons.logout_rounded,
                       label: Strings.checkOutTime,
-                      value: DateFormat('dd MMM yyyy, hh:mm a')
-                          .format(visitor.checkOutTime!.toLocal()),
+                      value: DateFormat(
+                        'dd MMM yyyy, hh:mm a',
+                      ).format(visitor.checkOutTime!.toLocal()),
                       isDark: isDark,
                       textPrimary: textPrimary,
                       textSecondary: textSecondary,
@@ -809,8 +819,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.info_outline_rounded,
-                              size: 18, color: AppColors.infoBlue),
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            size: 18,
+                            color: AppColors.infoBlue,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
@@ -839,8 +852,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.check_circle_outline_rounded,
-                              size: 20, color: AppColors.errorRed),
+                          const Icon(
+                            Icons.check_circle_outline_rounded,
+                            size: 20,
+                            color: AppColors.errorRed,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
@@ -930,8 +946,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                     width: double.infinity,
                     height: 48,
                     child: OutlinedButton.icon(
-                      icon: Icon(Icons.visibility_outlined,
-                          size: 18, color: primaryGold),
+                      icon: Icon(
+                        Icons.visibility_outlined,
+                        size: 18,
+                        color: primaryGold,
+                      ),
                       label: Text(
                         'View Full Visitor Profile',
                         style: TextStyle(
@@ -1026,15 +1045,15 @@ class _QrScannerScreenState extends State<QrScannerScreen>
     required VisitorDetailModel visitor,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final nowFormatted =
-        DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.now());
+    final nowFormatted = DateFormat(
+      'dd MMM yyyy, hh:mm a',
+    ).format(DateTime.now());
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (confirmContext) => AlertDialog(
-        backgroundColor:
-            isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
+        backgroundColor: isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
@@ -1103,8 +1122,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.schedule_rounded,
-                          size: 15, color: AppColors.successGreen),
+                      Icon(
+                        Icons.schedule_rounded,
+                        size: 15,
+                        color: AppColors.successGreen,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Entry Timestamp',
@@ -1157,8 +1179,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
             onPressed: () async {
               _isExecutingAction = true;
@@ -1183,15 +1204,15 @@ class _QrScannerScreenState extends State<QrScannerScreen>
     required VisitorDetailModel visitor,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final nowFormatted =
-        DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.now());
+    final nowFormatted = DateFormat(
+      'dd MMM yyyy, hh:mm a',
+    ).format(DateTime.now());
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (confirmContext) => AlertDialog(
-        backgroundColor:
-            isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
+        backgroundColor: isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
@@ -1235,7 +1256,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                     text: visitor.name,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  const TextSpan(text: '? This will mark the visit as completed.'),
+                  const TextSpan(
+                    text: '? This will mark the visit as completed.',
+                  ),
                 ],
               ),
             ),
@@ -1255,8 +1278,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.schedule_rounded,
-                          size: 15, color: AppColors.errorRed),
+                      Icon(
+                        Icons.schedule_rounded,
+                        size: 15,
+                        color: AppColors.errorRed,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Exit Timestamp',
@@ -1309,8 +1335,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
             onPressed: () async {
               _isExecutingAction = true;
@@ -1355,9 +1380,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
         Navigator.of(context, rootNavigator: true).pop();
       }
 
-      AppToast.showError(
-        message: e.toString().replaceFirst('Exception: ', ''),
-      );
+      AppToast.showError(message: e.toString().replaceFirst('Exception: ', ''));
     } finally {
       _isExecutingAction = false;
       _resumeScanner();
@@ -1388,9 +1411,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
         Navigator.of(context, rootNavigator: true).pop();
       }
 
-      AppToast.showError(
-        message: e.toString().replaceFirst('Exception: ', ''),
-      );
+      AppToast.showError(message: e.toString().replaceFirst('Exception: ', ''));
     } finally {
       _isExecutingAction = false;
       _resumeScanner();
@@ -1444,8 +1465,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
       context: context,
       barrierDismissible: true,
       builder: (dialogCtx) => AlertDialog(
-        backgroundColor:
-            isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
+        backgroundColor: isDark ? AppColors.darkCardBg : AppColors.lightCardBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
@@ -1455,7 +1475,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 color: primaryGold.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.keyboard_outlined, color: primaryGold, size: 22),
+              child: Icon(
+                Icons.keyboard_outlined,
+                color: primaryGold,
+                size: 22,
+              ),
             ),
             const SizedBox(width: 12),
             const Text(
@@ -1491,16 +1515,21 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               decoration: InputDecoration(
                 hintText: 'e.g. VIS001',
                 hintStyle: TextStyle(
-                  color: isDark ? AppColors.darkTextMuted : AppColors.lightTextHint,
+                  color: isDark
+                      ? AppColors.darkTextMuted
+                      : AppColors.lightTextHint,
                 ),
                 prefixIcon: Icon(Icons.tag_rounded, color: primaryGold),
                 filled: true,
-                fillColor:
-                    isDark ? AppColors.darkInputBg : AppColors.lightInputBg,
+                fillColor: isDark
+                    ? AppColors.darkInputBg
+                    : AppColors.lightInputBg,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.lightBorder,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -1541,8 +1570,10 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               }
               Navigator.of(dialogCtx).pop(id);
             },
-            child: const Text('Verify Pass',
-                style: TextStyle(fontWeight: FontWeight.w700)),
+            child: const Text(
+              'Verify Pass',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),
@@ -1570,9 +1601,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
     if (_isCheckingPermission) {
       return Scaffold(
         backgroundColor: Colors.black,
-        body: Center(
-          child: CircularProgressIndicator(color: primaryGold),
-        ),
+        body: Center(child: CircularProgressIndicator(color: primaryGold)),
       );
     }
 
@@ -1593,8 +1622,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.videocam_off_rounded,
-                        size: 48, color: AppColors.errorRed),
+                    const Icon(
+                      Icons.videocam_off_rounded,
+                      size: 48,
+                      color: AppColors.errorRed,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       'Camera error: ${error.errorCode.name}',
@@ -1633,8 +1665,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white, size: 18),
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                         onPressed: () => Navigator.of(context).pop(),
                         tooltip: 'Back',
                       ),
@@ -1702,8 +1737,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.cameraswitch_rounded,
-                          color: Colors.white, size: 20),
+                      icon: const Icon(
+                        Icons.cameraswitch_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                       onPressed: () => _scannerController.switchCamera(),
                       tooltip: 'Switch Camera',
                     ),
@@ -1716,8 +1754,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.keyboard_outlined,
-                          color: primaryGold, size: 20),
+                      icon: Icon(
+                        Icons.keyboard_outlined,
+                        color: primaryGold,
+                        size: 20,
+                      ),
                       onPressed: _showManualIdDialog,
                       tooltip: 'Enter Pass ID',
                     ),
@@ -1738,7 +1779,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.65),
                       borderRadius: BorderRadius.circular(30),
@@ -1749,8 +1792,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.center_focus_strong_rounded,
-                            size: 16, color: primaryGold),
+                        Icon(
+                          Icons.center_focus_strong_rounded,
+                          size: 16,
+                          color: primaryGold,
+                        ),
                         const SizedBox(width: 8),
                         const Text(
                           'Align visitor QR code inside the frame',
@@ -1768,7 +1814,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                     onTap: _showManualIdDialog,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 8),
+                        horizontal: 18,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: primaryGold.withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(20),
@@ -1779,8 +1827,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.edit_note_rounded,
-                              size: 17, color: primaryGold),
+                          Icon(
+                            Icons.edit_note_rounded,
+                            size: 17,
+                            color: primaryGold,
+                          ),
                           const SizedBox(width: 6),
                           Text(
                             'Enter Pass ID manually',
@@ -1805,11 +1856,10 @@ class _QrScannerScreenState extends State<QrScannerScreen>
 
   Widget _buildPermissionDeniedView(bool isDark, Color primaryGold) {
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.darkScaffoldBg : AppColors.lightScaffoldBg,
-      appBar: AppBar(
-        title: const Text('Camera Access'),
-      ),
+      backgroundColor: isDark
+          ? AppColors.darkScaffoldBg
+          : AppColors.lightScaffoldBg,
+      appBar: AppBar(title: const Text('Camera Access')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(28.0),
@@ -1859,8 +1909,10 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryGold,
                   foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 14,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -1912,8 +1964,11 @@ class _ScannerOverlayPainter extends CustomPainter {
     final backgroundPath = Path()
       ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
     final cutoutPath = Path()..addRRect(rrect);
-    final overlayPath =
-        Path.combine(PathOperation.difference, backgroundPath, cutoutPath);
+    final overlayPath = Path.combine(
+      PathOperation.difference,
+      backgroundPath,
+      cutoutPath,
+    );
 
     final bgPaint = Paint()
       ..color = Colors.black.withValues(alpha: 0.6)
@@ -1953,7 +2008,11 @@ class _ScannerOverlayPainter extends CustomPainter {
         ..moveTo(left + scanBoxSize - cornerRadius - cornerLength, top)
         ..lineTo(left + scanBoxSize - cornerRadius, top)
         ..quadraticBezierTo(
-            left + scanBoxSize, top, left + scanBoxSize, top + cornerRadius)
+          left + scanBoxSize,
+          top,
+          left + scanBoxSize,
+          top + cornerRadius,
+        )
         ..lineTo(left + scanBoxSize, top + cornerRadius + cornerLength),
       cornerPaint,
     );
@@ -1963,8 +2022,12 @@ class _ScannerOverlayPainter extends CustomPainter {
       Path()
         ..moveTo(left, top + scanBoxSize - cornerRadius - cornerLength)
         ..lineTo(left, top + scanBoxSize - cornerRadius)
-        ..quadraticBezierTo(left, top + scanBoxSize, left + cornerRadius,
-            top + scanBoxSize)
+        ..quadraticBezierTo(
+          left,
+          top + scanBoxSize,
+          left + cornerRadius,
+          top + scanBoxSize,
+        )
         ..lineTo(left + cornerRadius + cornerLength, top + scanBoxSize),
       cornerPaint,
     );
@@ -1972,14 +2035,21 @@ class _ScannerOverlayPainter extends CustomPainter {
     // Bottom-Right
     canvas.drawPath(
       Path()
-        ..moveTo(left + scanBoxSize - cornerRadius - cornerLength,
-            top + scanBoxSize)
+        ..moveTo(
+          left + scanBoxSize - cornerRadius - cornerLength,
+          top + scanBoxSize,
+        )
+        ..lineTo(left + scanBoxSize - cornerRadius, top + scanBoxSize)
+        ..quadraticBezierTo(
+          left + scanBoxSize,
+          top + scanBoxSize,
+          left + scanBoxSize,
+          top + scanBoxSize - cornerRadius,
+        )
         ..lineTo(
-            left + scanBoxSize - cornerRadius, top + scanBoxSize)
-        ..quadraticBezierTo(left + scanBoxSize, top + scanBoxSize,
-            left + scanBoxSize, top + scanBoxSize - cornerRadius)
-        ..lineTo(left + scanBoxSize,
-            top + scanBoxSize - cornerRadius - cornerLength),
+          left + scanBoxSize,
+          top + scanBoxSize - cornerRadius - cornerLength,
+        ),
       cornerPaint,
     );
 

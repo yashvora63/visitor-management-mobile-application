@@ -1,13 +1,12 @@
-import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:mobx/mobx.dart';
-import 'package:visitor_management_app/constants/strings.dart';
 import 'package:visitor_management_app/data/repository.dart';
-import 'package:visitor_management_app/models/visitors_list/visitors_model.dart';
-import 'package:visitor_management_app/stores/error/error_store.dart';
-import 'package:visitor_management_app/stores/success/success_store.dart';
-import 'package:visitor_management_app/utils/dio/dio_error_util.dart';
 import 'package:visitor_management_app/widgets/app_toast.dart';
+import 'package:visitor_management_app/constants/strings.dart';
+import 'package:visitor_management_app/stores/error/error_store.dart';
+import 'package:visitor_management_app/utils/dio/dio_error_util.dart';
+import 'package:visitor_management_app/stores/success/success_store.dart';
+import 'package:visitor_management_app/models/visitors_list/visitors_model.dart';
 
 part 'visitor_registration_store.g.dart';
 
@@ -132,51 +131,35 @@ abstract class _VisitorRegistrationStore with Store {
 
   @action
   String generateUniqueVisitorId(List<VisitorListModel> existingVisitors) {
-    final existingIds =
-        existingVisitors.map((v) => v.id.trim().toUpperCase()).toSet();
+    final existingIds = existingVisitors
+        .map((v) => v.id.trim().toUpperCase())
+        .toSet();
 
-    // 1. If existing visitors have sequential VISxxx format, find highest and increment
+    // 1. Find highest existing sequential number under 10000 (e.g. VIS001 -> 1, VIS002 -> 2)
+    // Avoid large legacy timestamps by limiting to up to 4 digits
     int maxNum = 0;
     for (final v in existingVisitors) {
-      final match = RegExp(
-        r'^VIS0*(\d+)$',
-        caseSensitive: false,
-      ).firstMatch(v.id.trim());
+      final raw = v.id.trim().toUpperCase();
+      final match = RegExp(r'^VIS-?0*([1-9]\d{0,3})$').firstMatch(raw);
       if (match != null) {
-        final num = int.tryParse(match.group(1) ?? '0') ?? 0;
-        if (num > maxNum) maxNum = num;
+        final val = int.tryParse(match.group(1) ?? '0') ?? 0;
+        if (val > maxNum) {
+          maxNum = val;
+        }
       }
     }
 
-    if (maxNum > 0) {
-      final nextNum = maxNum + 1;
-      final candidate = 'VIS${nextNum.toString().padLeft(3, '0')}';
+    // 2. Start from maxNum + 1 (or 1 if no existing sequential IDs)
+    int candidateNum = maxNum > 0 ? maxNum + 1 : 1;
+
+    // 3. Increment sequentially until an unused VIS001, VIS002, ... ID is found
+    while (true) {
+      final candidate = 'VIS${candidateNum.toString().padLeft(3, '0')}';
       if (!existingIds.contains(candidate)) {
         return candidate;
       }
+      candidateNum++;
     }
-
-    // 2. If no sequential IDs or fallback needed, use timestamp
-    final now = DateTime.now();
-    final timeStr = (now.millisecondsSinceEpoch % 1000000).toString().padLeft(
-      6,
-      '0',
-    );
-    final candidate = 'VIS$timeStr';
-    if (!existingIds.contains(candidate)) {
-      return candidate;
-    }
-
-    // 3. Guaranteed unique fallback with random salt
-    for (int i = 0; i < 100; i++) {
-      final randomSuffix = (100 + Random().nextInt(900)).toString();
-      final alt = 'VIS$timeStr$randomSuffix';
-      if (!existingIds.contains(alt)) {
-        return alt;
-      }
-    }
-
-    return 'VIS${DateTime.now().millisecondsSinceEpoch}';
   }
 
   @action

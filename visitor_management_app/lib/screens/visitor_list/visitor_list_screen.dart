@@ -1,13 +1,13 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:intl/intl.dart';
 import 'package:visitor_management_app/constants/colors.dart';
 import 'package:visitor_management_app/constants/strings.dart';
 import 'package:visitor_management_app/di/components/service_locator.dart';
 import 'package:visitor_management_app/models/visitors_list/visitors_model.dart';
+import 'package:visitor_management_app/stores/visitor_list/visitor_list_store.dart';
 import 'package:visitor_management_app/screens/visitor_detail/visitor_detail_screen.dart';
 import 'package:visitor_management_app/screens/visitor_registration/visitor_registration_screen.dart';
-import 'package:visitor_management_app/stores/visitor_list/visitor_list_store.dart';
 
 class VisitorListScreen extends StatefulWidget {
   const VisitorListScreen({super.key});

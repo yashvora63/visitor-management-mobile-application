@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../constants/colors.dart';
 import '../../constants/strings.dart';
 import '../../widgets/app_toast.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/app_section_card.dart';
 import '../../widgets/app_dropdown_field.dart';
@@ -53,10 +53,12 @@ class _VisitorRegistrationScreenState extends State<VisitorRegistrationScreen> {
     _nameController = TextEditingController(text: _registrationStore.name);
     _mobileController = TextEditingController(text: _registrationStore.mobile);
     _emailController = TextEditingController(text: _registrationStore.email);
-    _projectController =
-        TextEditingController(text: _registrationStore.project);
-    _purposeController =
-        TextEditingController(text: _registrationStore.purpose);
+    _projectController = TextEditingController(
+      text: _registrationStore.project,
+    );
+    _purposeController = TextEditingController(
+      text: _registrationStore.purpose,
+    );
 
     _nameController.addListener(
       () => _registrationStore.setName(_nameController.text),

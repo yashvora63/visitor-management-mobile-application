@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import '../../constants/colors.dart';
 import '../../constants/strings.dart';
+import 'package:flutter/material.dart';
 import '../../di/components/service_locator.dart';
-import '../../stores/navigation/navigation_store.dart';
 import '../bottom_navigation/bottom_navigation.dart';
+import '../../stores/navigation/navigation_store.dart';
 
 class PreviewScreen extends StatefulWidget {
   const PreviewScreen({super.key});
@@ -85,7 +85,9 @@ class _PreviewScreenState extends State<PreviewScreen> {
     final primaryGold = isDark ? AppColors.goldLight : AppColors.primaryGold;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkScaffoldBg : AppColors.lightScaffoldBg,
+      backgroundColor: isDark
+          ? AppColors.darkScaffoldBg
+          : AppColors.lightScaffoldBg,
       body: SafeArea(
         child: Column(
           children: [
@@ -131,10 +133,12 @@ class _PreviewScreenState extends State<PreviewScreen> {
                       Text(
                         Strings.companyName,
                         style: TextStyle(
-                          fontSize: 13.sp,
+                          fontSize: 13.px,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.5,
-                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                     ],
@@ -143,13 +147,18 @@ class _PreviewScreenState extends State<PreviewScreen> {
                     TextButton(
                       onPressed: _completeOnboarding,
                       style: TextButton.styleFrom(
-                        foregroundColor: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                        padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
+                        foregroundColor: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.lightTextSecondary,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 3.w,
+                          vertical: 0.5.h,
+                        ),
                       ),
                       child: Text(
                         "Skip",
                         style: TextStyle(
-                          fontSize: 11.sp,
+                          fontSize: 11.px,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.3,
                         ),
@@ -186,7 +195,10 @@ class _PreviewScreenState extends State<PreviewScreen> {
 
                         // Badge Tag
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 3.5.w, vertical: 0.6.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 3.5.w,
+                            vertical: 0.6.h,
+                          ),
                           decoration: BoxDecoration(
                             color: isDark
                                 ? AppColors.goldContainerDark
@@ -200,7 +212,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
                           child: Text(
                             slide.badge,
                             style: TextStyle(
-                              fontSize: 9.sp,
+                              fontSize: 9.px,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 1.2,
                               color: primaryGold,
@@ -215,10 +227,12 @@ class _PreviewScreenState extends State<PreviewScreen> {
                           slide.title,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 19.sp,
+                            fontSize: 19.px,
                             fontWeight: FontWeight.w800,
                             height: 1.25,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.lightTextPrimary,
                           ),
                         ),
 
@@ -231,10 +245,12 @@ class _PreviewScreenState extends State<PreviewScreen> {
                             slide.description,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 10.5.sp,
+                              fontSize: 10.5.px,
                               fontWeight: FontWeight.w400,
                               height: 1.5,
-                              color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary,
                             ),
                           ),
                         ),
@@ -266,8 +282,8 @@ class _PreviewScreenState extends State<PreviewScreen> {
                           color: isSelected
                               ? primaryGold
                               : (isDark
-                                  ? Colors.white.withValues(alpha: 0.18)
-                                  : Colors.black.withValues(alpha: 0.12)),
+                                    ? Colors.white.withValues(alpha: 0.18)
+                                    : Colors.black.withValues(alpha: 0.12)),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       );
@@ -280,7 +296,9 @@ class _PreviewScreenState extends State<PreviewScreen> {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       padding: EdgeInsets.symmetric(
-                        horizontal: _currentPage == _totalPages - 1 ? 5.w : 4.5.w,
+                        horizontal: _currentPage == _totalPages - 1
+                            ? 5.w
+                            : 4.5.w,
                         vertical: 1.5.h,
                       ),
                       decoration: BoxDecoration(
@@ -305,10 +323,14 @@ class _PreviewScreenState extends State<PreviewScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            _currentPage == _totalPages - 1 ? "Get Started" : "Next",
+                            _currentPage == _totalPages - 1
+                                ? "Get Started"
+                                : "Next",
                             style: TextStyle(
-                              color: isDark ? AppColors.darkScaffoldBg : Colors.white,
-                              fontSize: 11.5.sp,
+                              color: isDark
+                                  ? AppColors.darkScaffoldBg
+                                  : Colors.white,
+                              fontSize: 11.5.px,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.4,
                             ),
@@ -318,8 +340,10 @@ class _PreviewScreenState extends State<PreviewScreen> {
                             _currentPage == _totalPages - 1
                                 ? Icons.arrow_forward_rounded
                                 : Icons.arrow_forward_ios_rounded,
-                            size: 14.sp,
-                            color: isDark ? AppColors.darkScaffoldBg : Colors.white,
+                            size: 14.px,
+                            color: isDark
+                                ? AppColors.darkScaffoldBg
+                                : Colors.white,
                           ),
                         ],
                       ),
@@ -334,7 +358,11 @@ class _PreviewScreenState extends State<PreviewScreen> {
     );
   }
 
-  Widget _buildHeroIllustration(OnboardingItem slide, bool isDark, Color primaryGold) {
+  Widget _buildHeroIllustration(
+    OnboardingItem slide,
+    bool isDark,
+    Color primaryGold,
+  ) {
     return Container(
       width: 68.w,
       height: 28.h,
@@ -387,11 +415,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
                 width: 1.5,
               ),
             ),
-            child: Icon(
-              slide.icon,
-              size: 42.sp,
-              color: primaryGold,
-            ),
+            child: Icon(slide.icon, size: 42.px, color: primaryGold),
           ),
         ],
       ),
